@@ -2,4 +2,3 @@ hub/node_modules
 hub/dist/
 hub/test/out/
 .DS_Store
-hub/build/dmg/background.tiff

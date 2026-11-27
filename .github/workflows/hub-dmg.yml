@@ -28,21 +28,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: hub/package-lock.json
-
       - name: Release visée
         run: |
           TAG="${{ github.event.inputs.tag }}"
           [ -n "$TAG" ] || TAG="$(gh release view --json tagName --jq .tagName)"
           echo "TAG=$TAG" >> "$GITHUB_ENV"; echo "Release : $TAG"
 
-      - name: Dépendances
-        working-directory: hub
-        run: npm ci
+      - name: Outil dmgbuild
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install -q dmgbuild
+          echo "PY=$RUNNER_TEMP/venv/bin/python" >> "$GITHUB_ENV"
 
       - name: Apps signées de la release
         run: gh release download "$TAG" -p "Surpriz-Hub-Mac-*.zip" -D "$RUNNER_TEMP/out"
@@ -51,22 +47,30 @@ jobs:
         working-directory: hub
         run: |
           set -euo pipefail
-          tiffutil -cathidpicheck build/dmg/background.png build/dmg/background@2x.png -out build/dmg/background.tiff
-          mkdir -p "$RUNNER_TEMP/dmgs"
-          for pair in "arm64:Surpriz-Hub-Mac-AppleSilicon" "x64:Surpriz-Hub-Mac-Intel"; do
-            A="${pair%%:*}"; F="${pair#*:}"
-            ditto -x -k "$RUNNER_TEMP/out/$F.zip" "$RUNNER_TEMP/app-$A"
-            APP="$(find "$RUNNER_TEMP/app-$A" -maxdepth 1 -name '*.app' | head -n 1)"
-            codesign --verify --deep --verbose=2 "$APP"
-            npx electron-builder --mac dmg "--$A" --publish never --prepackaged "$APP" -c.directories.output="$RUNNER_TEMP/dmg-$A"
-            cp "$RUNNER_TEMP/dmg-$A/"*.dmg "$RUNNER_TEMP/dmgs/$F.dmg"
+          mkdir -p "$RUNNER_TEMP/dmgs" "$RUNNER_TEMP/captures"
+          for F in Surpriz-Hub-Mac-AppleSilicon Surpriz-Hub-Mac-Intel; do
+            ditto -x -k "$RUNNER_TEMP/out/$F.zip" "$RUNNER_TEMP/app-$F"
+            APP="$(find "$RUNNER_TEMP/app-$F" -maxdepth 1 -name '*.app' | head -n 1)"
+            codesign --verify --deep --verbose=1 "$APP"
+            "$PY" tools/make_dmg.py "$APP" "$RUNNER_TEMP/dmgs/$F.dmg"
             hdiutil verify "$RUNNER_TEMP/dmgs/$F.dmg"
-            MNT="$(hdiutil attach -nobrowse -readonly "$RUNNER_TEMP/dmgs/$F.dmg" | tail -n 1 | cut -f3)"
-            ls -la "$MNT" "$MNT/.background" || true
+            MNT="$(hdiutil attach -readonly "$RUNNER_TEMP/dmgs/$F.dmg" | tail -n 1 | cut -f3)"
+            ls -la "$MNT" "$MNT/.background"
             codesign --verify --deep "$MNT/$(basename "$APP")"
-            hdiutil detach "$MNT"
+            # capture de la fenêtre du Finder, pour vérifier le rendu
+            open "$MNT" || true; sleep 6
+            screencapture -x "$RUNNER_TEMP/captures/$F.png" || true
+            osascript -e 'tell application "Finder" to close every window' || true
+            hdiutil detach "$MNT" || hdiutil detach -force "$MNT"
           done
           ls -la "$RUNNER_TEMP/dmgs"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: captures-dmg
+          path: ${{ runner.temp }}/captures/
+          retention-days: 3
 
       - name: Ajout à la release
         run: |

@@ -62,25 +62,6 @@
         }
       ],
       "signAndEditExecutable": false
-    },
-    "dmg": {
-      "title": "SÜRPRIZ HÜB",
-      "background": "build/dmg/background.tiff",
-      "iconSize": 96,
-      "contents": [
-        {
-          "x": 160,
-          "y": 190,
-          "type": "file"
-        },
-        {
-          "x": 480,
-          "y": 190,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ],
-      "artifactName": "Surpriz-Hub-Mac-${arch}.${ext}"
     }
   },
   "dependencies": {
