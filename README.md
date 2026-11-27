@@ -36,6 +36,14 @@ carte de l'addon quand une mise à jour est disponible, sur sa fiche, et à la f
 
 Ajouter une fiche dans `catalog.json` (sur le modèle de Toolkit) puis publier sa première version avec le script. Le champ `type` indique comment l'installer : `cep` pour After Effects, Premiere, Photoshop, Illustrator. Pour un autre logiciel (Blender…), le hub a besoin d'un module d'installation en plus.
 
+## Installer le hub sur un Mac
+
+Une seule ligne à coller dans Terminal (aucun réglage de sécurité à faire, la dernière version est vérifiée puis rangée dans Applications) :
+
+```
+curl -fsSL https://raw.githubusercontent.com/SURPRIZSTUDIO/surpriz-hub/main/install-mac.sh | bash
+```
+
 ## Nouvelle version du hub
 
 Changer `version` dans `hub/package.json` puis pousser sur `main` (ou demander à Claude « publie le hub 1.3.0 »).

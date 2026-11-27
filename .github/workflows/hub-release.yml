@@ -75,7 +75,13 @@ jobs:
         if: steps.v.outputs.todo == 'true'
         run: |
           V="${{ steps.v.outputs.version }}"
-          printf 'SÜRPRIZ HÜB %s pour Mac (Apple Silicon et Intel) et Windows.\n\nDéjà installé ? Le hub propose la mise à jour tout seul.\nPremière installation : télécharge le zip de ton ordinateur ci-dessous.\n' "$V" > "$RUNNER_TEMP/notes.md"
+          {
+            printf 'SÜRPRIZ HÜB %s pour Mac (Apple Silicon et Intel) et Windows.\n\n' "$V"
+            printf 'Déjà installé ? Le hub propose la mise à jour tout seul.\n\n'
+            printf '**Première installation sur Mac** : ouvre Terminal et colle cette ligne (pas de réglage de sécurité à faire) :\n\n'
+            printf '```\ncurl -fsSL https://raw.githubusercontent.com/SURPRIZSTUDIO/surpriz-hub/main/install-mac.sh | bash\n```\n\n'
+            printf '**Première installation sur Windows** : télécharge Surpriz-Hub-Windows.zip ci-dessous, décompresse-le et ouvre SURPRIZ HUB.exe.\n'
+          } > "$RUNNER_TEMP/notes.md"
           gh release create "hub-v$V" --target "$GITHUB_SHA" --title "SÜRPRIZ HÜB $V" --notes-file "$RUNNER_TEMP/notes.md" "$RUNNER_TEMP"/out/Surpriz-Hub-*.zip
 
       - name: Annonce dans le catalogue
