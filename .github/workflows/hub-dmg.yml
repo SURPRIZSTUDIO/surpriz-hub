@@ -60,6 +60,10 @@ jobs:
             # capture de la fenêtre du Finder, pour vérifier le rendu
             open "$MNT" || true; sleep 6
             screencapture -x "$RUNNER_TEMP/captures/$F.png" || true
+            if [ -s "$RUNNER_TEMP/captures/$F.png" ]; then
+              sips -Z 1100 -s format jpeg -s formatOptions 70 "$RUNNER_TEMP/captures/$F.png" --out "$RUNNER_TEMP/captures/$F.jpg" >/dev/null
+              echo "::group::capture $F (base64)"; echo "CAPTURE-DEBUT $F"; base64 -i "$RUNNER_TEMP/captures/$F.jpg"; echo "CAPTURE-FIN $F"; echo "::endgroup::"
+            fi
             osascript -e 'tell application "Finder" to close every window' || true
             hdiutil detach "$MNT" || hdiutil detach -force "$MNT"
           done
