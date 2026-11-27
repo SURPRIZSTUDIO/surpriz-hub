@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "hub": {
+    "version": "1.1.0",
+    "download": "https://github.com/SURPRIZSTUDIO/surpriz-hub/releases/latest"
+  },
+  "addons": [
+    {
+      "id": "toolkit",
+      "name": "Toolkit",
+      "version": "0.26.0",
+      "host": "aftereffects",
+      "type": "cep",
+      "cep": {
+        "bundleId": "com.surpriz.toolkit",
+        "legacyIds": [
+          "com.surpriz.surcore",
+          "com.surpriz.tktesta",
+          "com.surpriz.tktestb",
+          "com.surpriz.tktestc",
+          "com.surpriz.tktestd",
+          "com.surpriz.tkteste"
+        ],
+        "folder": "toolkit",
+        "menu": "Toolkit"
+      },
+      "requires": {
+        "fr": "After Effects 2021 ou plus récent",
+        "en": "After Effects 2021 or later"
+      },
+      "tagline": {
+        "fr": "Neuf outils dans un seul panneau pour créer, animer, colorer et exporter plus vite.",
+        "en": "Nine tools in a single panel to build, animate, color and export faster."
+      },
+      "tools": [
+        {
+          "icon": "compos",
+          "name": {
+            "fr": "Compos",
+            "en": "Comps"
+          },
+          "text": {
+            "fr": "Formats sociaux et vidéo en un clic, déclinaisons, marges de sécurité.",
+            "en": "Social and video formats in one click, versions, safe zones."
+          }
+        },
+        {
+          "icon": "project",
+          "name": {
+            "fr": "Projet",
+            "en": "Project"
+          },
+          "text": {
+            "fr": "Rangement par type, doublons, renommage en série.",
+            "en": "Sort by type, merge duplicates, batch rename."
+          }
+        },
+        {
+          "icon": "anchor",
+          "name": {
+            "fr": "Ancrage",
+            "en": "Anchor"
+          },
+          "text": {
+            "fr": "Point d’ancrage sur 9 positions, sans bouger le calque.",
+            "en": "Anchor point on 9 positions, without moving the layer."
+          }
+        },
+        {
+          "icon": "curves",
+          "name": {
+            "fr": "Courbes",
+            "en": "Curves"
+          },
+          "text": {
+            "fr": "Éditeur de vitesse, 17 presets, favoris, tracés compris.",
+            "en": "Speed curve editor, 17 presets, favorites, paths included."
+          }
+        },
+        {
+          "icon": "keys",
+          "name": {
+            "fr": "Clés",
+            "en": "Keys"
+          },
+          "text": {
+            "fr": "Escalier, étirer, inverser, miroir, aligner.",
+            "en": "Stagger, stretch, reverse, mirror, align."
+          }
+        },
+        {
+          "icon": "colors",
+          "name": {
+            "fr": "Couleurs",
+            "en": "Colors"
+          },
+          "text": {
+            "fr": "Palettes .ase, couleurs du projet, remplacement global.",
+            "en": ".ase palettes, project colors, global replace."
+          }
+        },
+        {
+          "icon": "expressions",
+          "name": {
+            "fr": "Expressions",
+            "en": "Expressions"
+          },
+          "text": {
+            "fr": "10 presets réglables et ta propre bibliothèque.",
+            "en": "10 adjustable presets and your own library."
+          }
+        },
+        {
+          "icon": "layers",
+          "name": {
+            "fr": "Calques",
+            "en": "Layers"
+          },
+          "text": {
+            "fr": "Nulls de contrôle, découpe de textes et de formes.",
+            "en": "Control nulls, split text and shapes."
+          }
+        },
+        {
+          "icon": "export",
+          "name": {
+            "fr": "Export",
+            "en": "Export"
+          },
+          "text": {
+            "fr": "MP4, ProRes ou GIF compressés en un bouton.",
+            "en": "MP4, ProRes or GIF compressed in one click."
+          }
+        }
+      ],
+      "images": {
+        "fr": [
+          "addons/toolkit/shots/fr/compos.png",
+          "addons/toolkit/shots/fr/curves.png",
+          "addons/toolkit/shots/fr/colors.png",
+          "addons/toolkit/shots/fr/keys.png",
+          "addons/toolkit/shots/fr/export.png",
+          "addons/toolkit/shots/fr/expressions.png"
+        ],
+        "en": [
+          "addons/toolkit/shots/en/compos.png",
+          "addons/toolkit/shots/en/curves.png",
+          "addons/toolkit/shots/en/colors.png",
+          "addons/toolkit/shots/en/keys.png",
+          "addons/toolkit/shots/en/export.png",
+          "addons/toolkit/shots/en/expressions.png"
+        ]
+      },
+      "guides": {
+        "fr": "addons/toolkit/guides/guide-fr.pdf",
+        "en": "addons/toolkit/guides/guide-en.pdf"
+      },
+      "download": {
+        "url": "addons/toolkit/toolkit-0.26.0.zip",
+        "sha256": "c4c8ccfdf9dc2339ca47b8b297414c57b6a87bf1d8952f62d23fb1942fd53ecf",
+        "size": 139799
+      },
+      "price": null,
+      "license": null
+    }
+  ],
+  "soon": [
+    {
+      "host": "blender",
+      "name": "Blender"
+    },
+    {
+      "host": "photoshop",
+      "name": "Photoshop"
+    }
+  ]
+}
