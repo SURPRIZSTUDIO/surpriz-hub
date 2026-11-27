@@ -1,0 +1,84 @@
+# Disques d'installation Mac (.dmg) : fabriqués sur un Mac de GitHub à partir des apps signées de la release,
+# puis ajoutés à celle-ci. Lancé automatiquement après chaque publication du hub (ou à la main avec un tag).
+name: Disques d'installation Mac
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release du hub (ex. hub-v1.4.1) ; vide = la dernière"
+        required: false
+  push:
+    branches: [main]
+    paths: [".github/workflows/hub-dmg.yml", "hub/build/dmg/**"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hub-dmg
+  cancel-in-progress: false
+
+jobs:
+  dmg:
+    runs-on: macos-15-intel
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: hub/package-lock.json
+
+      - name: Release visée
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          [ -n "$TAG" ] || TAG="$(gh release view --json tagName --jq .tagName)"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"; echo "Release : $TAG"
+
+      - name: Dépendances
+        working-directory: hub
+        run: npm ci
+
+      - name: Apps signées de la release
+        run: gh release download "$TAG" -p "Surpriz-Hub-Mac-*.zip" -D "$RUNNER_TEMP/out"
+
+      - name: Fabrication et vérification des .dmg
+        working-directory: hub
+        run: |
+          set -euo pipefail
+          tiffutil -cathidpicheck build/dmg/background.png build/dmg/background@2x.png -out build/dmg/background.tiff
+          mkdir -p "$RUNNER_TEMP/dmgs"
+          for pair in "arm64:Surpriz-Hub-Mac-AppleSilicon" "x64:Surpriz-Hub-Mac-Intel"; do
+            A="${pair%%:*}"; F="${pair#*:}"
+            ditto -x -k "$RUNNER_TEMP/out/$F.zip" "$RUNNER_TEMP/app-$A"
+            APP="$(find "$RUNNER_TEMP/app-$A" -maxdepth 1 -name '*.app' | head -n 1)"
+            codesign --verify --deep --verbose=2 "$APP"
+            npx electron-builder --mac dmg "--$A" --publish never --prepackaged "$APP" -c.directories.output="$RUNNER_TEMP/dmg-$A"
+            cp "$RUNNER_TEMP/dmg-$A/"*.dmg "$RUNNER_TEMP/dmgs/$F.dmg"
+            hdiutil verify "$RUNNER_TEMP/dmgs/$F.dmg"
+            MNT="$(hdiutil attach -nobrowse -readonly "$RUNNER_TEMP/dmgs/$F.dmg" | tail -n 1 | cut -f3)"
+            ls -la "$MNT" "$MNT/.background" || true
+            codesign --verify --deep "$MNT/$(basename "$APP")"
+            hdiutil detach "$MNT"
+          done
+          ls -la "$RUNNER_TEMP/dmgs"
+
+      - name: Ajout à la release
+        run: |
+          gh release upload "$TAG" "$RUNNER_TEMP"/dmgs/*.dmg --clobber
+          V="${TAG#hub-v}"
+          {
+            printf 'SÜRPRIZ HÜB %s pour Mac (Apple Silicon et Intel) et Windows.\n\n' "$V"
+            printf 'Déjà installé ? Le hub propose la mise à jour tout seul.\n\n'
+            printf '**Première installation sur Mac** : télécharge le .dmg de ton Mac (Apple Silicon = puces M1, M2, M3… ; sinon Intel), ouvre-le et suis les étapes affichées.\n'
+            printf 'Sans réglage de sécurité : ouvre Terminal et colle cette ligne :\n\n'
+            printf '```\ncurl -fsSL https://raw.githubusercontent.com/SURPRIZSTUDIO/surpriz-hub/main/install-mac.sh | bash\n```\n\n'
+            printf '**Première installation sur Windows** : télécharge Surpriz-Hub-Windows.zip, décompresse-le et ouvre SURPRIZ HUB.exe : il s’installe tout seul.\n\n'
+            printf '_Les fichiers .zip Mac servent aux mises à jour automatiques._\n'
+          } > "$RUNNER_TEMP/notes.md"
+          gh release edit "$TAG" --notes-file "$RUNNER_TEMP/notes.md"

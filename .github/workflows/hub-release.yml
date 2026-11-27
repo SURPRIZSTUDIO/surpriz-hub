@@ -1,6 +1,6 @@
 # Publie SÜRPRIZ HÜB dès que sa version change dans hub/package.json :
-# tests et construction (Mac + Windows), disque d'installation Mac (.dmg), release GitHub,
-# puis annonce dans catalog.json (les hubs installés proposent alors « Mettre à jour »).
+# tests et construction (Mac + Windows), release GitHub, annonce dans catalog.json
+# (les hubs installés proposent alors « Mettre à jour »), puis lancement des .dmg Mac (hub-dmg.yml).
 name: Publier SÜRPRIZ HÜB
 
 on:
@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: hub-release
@@ -79,60 +80,9 @@ jobs:
           path: ${{ runner.temp }}/out/
           retention-days: 3
 
-  dmg:
+  publish:
     needs: build
     if: needs.build.outputs.todo == 'true'
-    runs-on: macos-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: hub/package-lock.json
-
-      - name: Dépendances
-        working-directory: hub
-        run: npm ci
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: hub-zips
-          path: ${{ runner.temp }}/out
-
-      - name: Disques d'installation (.dmg)
-        working-directory: hub
-        run: |
-          set -euo pipefail
-          tiffutil -cathidpicheck build/dmg/background.png build/dmg/background@2x.png -out build/dmg/background.tiff
-          mkdir -p "$RUNNER_TEMP/dmgs"
-          for pair in "arm64:Surpriz-Hub-Mac-AppleSilicon" "x64:Surpriz-Hub-Mac-Intel"; do
-            A="${pair%%:*}"; F="${pair#*:}"
-            ditto -x -k "$RUNNER_TEMP/out/$F.zip" "$RUNNER_TEMP/app-$A"
-            APP="$(find "$RUNNER_TEMP/app-$A" -maxdepth 1 -name '*.app' | head -n 1)"
-            codesign --verify --deep --verbose=2 "$APP"
-            npx electron-builder --mac dmg "--$A" --publish never --prepackaged "$APP" -c.directories.output="$RUNNER_TEMP/dmg-$A"
-            cp "$RUNNER_TEMP/dmg-$A/"*.dmg "$RUNNER_TEMP/dmgs/$F.dmg"
-            hdiutil verify "$RUNNER_TEMP/dmgs/$F.dmg"
-            MNT="$(hdiutil attach -nobrowse -readonly "$RUNNER_TEMP/dmgs/$F.dmg" | tail -n 1 | cut -f3)"
-            ls -la "$MNT"
-            codesign --verify --deep "$MNT/$(basename "$APP")"
-            hdiutil detach "$MNT"
-          done
-          ls -la "$RUNNER_TEMP/dmgs"
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: hub-dmgs
-          path: ${{ runner.temp }}/dmgs/
-          retention-days: 3
-
-  publish:
-    # publie même si le .dmg n'a pas pu être fabriqué (Mac de GitHub indisponibles) : les zips suffisent aux mises à jour
-    needs: [build, dmg]
-    if: always() && needs.build.result == 'success' && needs.build.outputs.todo == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -181,3 +131,6 @@ jobs:
             if git push -q origin HEAD:main; then echo "Catalogue publié"; break; fi
             sleep 5
           done
+
+      - name: Disques d'installation Mac (.dmg)
+        run: gh workflow run hub-dmg.yml -f tag="hub-v$V"
