@@ -12,6 +12,9 @@ contextBridge.exposeInMainWorld("hub", {
   openLink: (url) => ipcRenderer.invoke("hub:openLink", url),
   selfUpdate: () => ipcRenderer.invoke("hub:selfUpdate"),
   updateFailed: () => ipcRenderer.invoke("hub:updateFailed"),
+  moveToApps: () => ipcRenderer.invoke("hub:moveToApps"),
+  fetchHub: () => ipcRenderer.invoke("hub:fetchHub"),
+  revealFetched: () => ipcRenderer.invoke("hub:revealFetched"),
   onUpdateProgress: (cb) => {
     const h = (e, info) => cb(info);
     ipcRenderer.on("hub:updateProgress", h);

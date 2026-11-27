@@ -51,7 +51,9 @@ function createWindow() {
 ipcMain.handle("hub:info", () => ({
   version: app.getVersion(),
   platform: process.platform,
-  locale: app.getLocale()
+  locale: app.getLocale(),
+  // Mac : hors du dossier Applications, l'app ne peut pas se mettre à jour toute seule
+  inApplications: process.platform === "darwin" && app.isPackaged ? app.isInApplicationsFolder() : null
 }));
 
 /** Catalogue pour l'interface : adresses des images prêtes à afficher, source (en ligne / copie / app). */
@@ -131,6 +133,28 @@ ipcMain.handle("hub:selfUpdate", async (e) => {
   }
 });
 ipcMain.handle("hub:updateFailed", () => updater.consumeFailure());
+
+/** Mac : range l'app dans Applications (elle se rouvre depuis là). Une ancienne copie du même nom est remplacée. */
+ipcMain.handle("hub:moveToApps", () => {
+  if (process.platform !== "darwin" || !app.isPackaged || app.isInApplicationsFolder()) return { ok: true, already: true };
+  try { return { ok: app.moveToApplicationsFolder({ conflictHandler: () => true }) }; }
+  catch (err) { return { ok: false, detail: String(err.message || err) }; }
+});
+
+/** Télécharge la nouvelle version dans Téléchargements et la montre dans le Finder / l'Explorateur. */
+let fetched = null;
+ipcMain.handle("hub:fetchHub", async (e) => {
+  const send = (info) => { if (!e.sender.isDestroyed()) e.sender.send("hub:updateProgress", { step: "download", ...info }); };
+  try {
+    const { data } = await catalog.load(true);
+    fetched = await updater.fetchTo(data.hub, app.getPath("downloads"), (received, total) => send({ received, total }));
+    shell.showItemInFolder(fetched);
+    return { ok: true, name: path.basename(fetched) };
+  } catch (err) {
+    return { ok: false, detail: String(err.message || err) };
+  }
+});
+ipcMain.handle("hub:revealFetched", () => { if (fetched && fs.existsSync(fetched)) shell.showItemInFolder(fetched); });
 
 ipcMain.handle("hub:openLink", (e, url) => {
   if (catalog.allowed(url)) shell.openExternal(url);

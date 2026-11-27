@@ -189,19 +189,22 @@
     }
     const hub = state.catalog && state.catalog.hub;
     const b = $("banner");
+    const newer = !!(hub && hub.version && cmpVer(hub.version, state.info.version) > 0);
+    const su = (hub && hub.selfUpdate) || {};
+    const btn = (act, label, ghost) => `<button class="btn ${ghost ? "ghost" : "primary"} sm" data-act="${act}">${esc(label)}</button>`;
+    let text = null, buttons = "";
     if (state.updateFailed) {
-      b.innerHTML = `<span>${esc(state.info.platform === "darwin" ? T().hub_failed_mac : T().hub_failed_win)}</span>` +
-        (hub && hub.selfUpdate && hub.selfUpdate.ok && cmpVer(hub.version, state.info.version) > 0 ? `<button class="btn primary sm" data-act="hubupdate">${esc(T().b_retry)}</button>` : "") +
-        `<button class="btn ghost sm" data-act="hubget">${esc(T().b_get)}</button>`;
-      b.hidden = false;
-    } else if (hub && hub.version && cmpVer(hub.version, state.info.version) > 0) {
-      const su = hub.selfUpdate || {};
-      const hint = !su.ok && su.reason === "translocated" ? ` ${T().hub_translocated}` : "";
-      b.innerHTML = `<span>${esc(T().hub_update(hub.version) + hint)}</span>` + (su.ok
-        ? `<button class="btn primary sm" data-act="hubupdate">${esc(T().b_hubupdate)}</button>`
-        : `<button class="btn primary sm" data-act="hubget">${esc(T().b_get)}</button>`);
-      b.hidden = false;
-    } else b.hidden = true;
+      text = state.info.platform === "darwin" ? T().hub_failed_mac : T().hub_failed_win;
+      buttons = (newer && su.ok ? btn("hubupdate", T().b_retry) : "") + btn("hubfetch", T().b_get, newer && su.ok);
+    } else if (state.info.platform === "darwin" && state.info.inApplications === false) {
+      text = (newer ? T().hub_update(hub.version) + " " : "") + T().hub_move;
+      buttons = btn("hubmove", T().b_move);
+    } else if (newer) {
+      text = T().hub_update(hub.version) + (!su.ok && su.reason === "readonly" ? " " + T().hub_readonly : "");
+      buttons = su.ok ? btn("hubupdate", T().b_hubupdate) : btn("hubfetch", T().b_get);
+    }
+    if (text) { b.innerHTML = `<span>${esc(text)}</span><span class="banner-actions">${buttons}</span>`; b.hidden = false; }
+    else b.hidden = true;
   }
 
   function render() {
@@ -317,7 +320,40 @@
     for (const k of keys) { if (k === failed) break; setStep(k, "ok"); }
     setStep(failed, "err");
     $("sheet-msg").innerHTML = `<p>${esc(T().hub_update_err)}</p><p><code>${esc(res.detail || "?")}</code></p>`;
-    $("sheet-actions").innerHTML = `<button class="btn ghost" data-act="close">${esc(T().b_close)}</button><button class="btn primary" data-act="hubget">${esc(T().b_get)}</button>`;
+    $("sheet-actions").innerHTML = `<button class="btn ghost" data-act="close">${esc(T().b_close)}</button><button class="btn primary" data-act="hubfetch">${esc(T().b_get)}</button>`;
+  }
+
+  /** Télécharge la nouvelle version dans Téléchargements (quand le hub ne peut pas se remplacer tout seul). */
+  async function doHubFetch() {
+    const hub = state.catalog.hub;
+    openSheet(T().sheet_get, "SÜRPRIZ HÜB " + hub.version, ["hdl"]);
+    setStep("hdl", "doing");
+    const off = api.onUpdateProgress((info) => {
+      if (!info.total) return;
+      const li = document.querySelector('#sheet-steps li[data-key="hdl"] span:last-child');
+      if (li) li.textContent = T().step_hdl + " · " + Math.min(100, Math.round((info.received / info.total) * 100)) + " %";
+    });
+    let res;
+    try { res = await api.fetchHub(); } catch (e) { res = { ok: false, detail: String(e.message || e) }; }
+    off();
+    if (res.ok) {
+      setStep("hdl", "ok");
+      const msg = state.info.platform === "darwin" ? T().hub_got_mac(esc(res.name)) : T().hub_got_win(esc(res.name));
+      $("sheet-msg").innerHTML = `<p>${msg}</p>`;
+      $("sheet-actions").innerHTML = `<button class="btn ghost" data-act="hubreveal">${esc(T().b_show)}</button><button class="btn primary" data-act="close">${esc(T().b_done)}</button>`;
+    } else {
+      setStep("hdl", "err");
+      $("sheet-msg").innerHTML = `<p>${esc(T().get_err)}</p><p><code>${esc(res.detail || "?")}</code></p>`;
+      $("sheet-actions").innerHTML = `<button class="btn ghost" data-act="close">${esc(T().b_close)}</button><button class="btn primary" data-act="hubget">${esc(T().b_page)}</button>`;
+    }
+  }
+
+  async function doHubMove() {
+    const res = await api.moveToApps();
+    if (res && res.ok) return; // l'app se rouvre depuis Applications
+    openSheet(T().sheet_hub, "SÜRPRIZ HÜB", []);
+    $("sheet-msg").innerHTML = `<p>${esc(T().move_failed)}</p>` + (res && res.detail ? `<p><code>${esc(res.detail)}</code></p>` : "");
+    $("sheet-actions").innerHTML = `<button class="btn primary" data-act="close">${esc(T().b_close)}</button>`;
   }
 
   /* ---------- Événements ---------- */
@@ -342,6 +378,9 @@
       case "close": closeSheet(); break;
       case "hubget": if (state.catalog.hub && state.catalog.hub.download) api.openLink(state.catalog.hub.download); break;
       case "hubupdate": doHubUpdate(); break;
+      case "hubfetch": doHubFetch(); break;
+      case "hubreveal": api.revealFetched(); break;
+      case "hubmove": doHubMove(); break;
     }
   });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("sheet").hidden && $("sheet-actions").children.length) closeSheet(); });

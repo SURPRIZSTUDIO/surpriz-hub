@@ -40,8 +40,16 @@ window.HUB_TEXT = {
     hub_update_err: "La mise à jour n’a pas abouti. Tu peux télécharger la nouvelle version à la main. Détail :",
     hub_failed_mac: "La dernière mise à jour n’a pas pu remplacer l’app. Autorise SÜRPRIZ HÜB dans Réglages Système › Confidentialité et sécurité › Gestion des apps, puis réessaie.",
     hub_failed_win: "La dernière mise à jour n’a pas pu remplacer l’app. Ferme-la, puis réessaie, ou télécharge la nouvelle version à la main.",
-    hub_translocated: "Pour les mises à jour en un clic, glisse SÜRPRIZ HÜB dans le dossier Applications puis rouvre-le.",
-    b_retry: "Réessayer"
+    b_retry: "Réessayer",
+    hub_move: "Range SÜRPRIZ HÜB dans le dossier Applications pour recevoir les mises à jour en un clic.",
+    b_move: "Ranger dans Applications",
+    move_failed: "Le déplacement n’a pas abouti. Glisse SÜRPRIZ HÜB dans Applications depuis le Finder, puis rouvre-le.",
+    hub_readonly: "Ce dossier est protégé : le hub ne peut pas s’y remplacer tout seul.",
+    sheet_get: "Téléchargement",
+    hub_got_mac: (f) => "<b>" + f + "</b> est dans ton dossier Téléchargements. Ouvre-le, puis glisse SÜRPRIZ HÜB dans Applications en remplaçant l’ancien.",
+    hub_got_win: (f) => "<b>" + f + "</b> est dans ton dossier Téléchargements. Décompresse-le, puis remplace l’ancien dossier du hub.",
+    get_err: "Le téléchargement n’a pas abouti. Détail :",
+    b_show: "Afficher le fichier", b_page: "Page de téléchargement"
   },
   en: {
     nav_all: "All add-ons", nav_soon: "soon",
@@ -83,7 +91,15 @@ window.HUB_TEXT = {
     hub_update_err: "The update did not complete. You can download the new version manually. Details:",
     hub_failed_mac: "The last update could not replace the app. Allow SÜRPRIZ HÜB in System Settings › Privacy & Security › App Management, then try again.",
     hub_failed_win: "The last update could not replace the app. Close it and try again, or download the new version manually.",
-    hub_translocated: "For one-click updates, drag SÜRPRIZ HÜB into the Applications folder and reopen it.",
-    b_retry: "Try again"
+    b_retry: "Try again",
+    hub_move: "Move SÜRPRIZ HÜB to the Applications folder to get one-click updates.",
+    b_move: "Move to Applications",
+    move_failed: "The move did not complete. Drag SÜRPRIZ HÜB into Applications from the Finder, then reopen it.",
+    hub_readonly: "This folder is protected: the hub cannot replace itself here.",
+    sheet_get: "Download",
+    hub_got_mac: (f) => "<b>" + f + "</b> is in your Downloads folder. Open it, then drag SÜRPRIZ HÜB into Applications, replacing the old one.",
+    hub_got_win: (f) => "<b>" + f + "</b> is in your Downloads folder. Unzip it, then replace the old hub folder.",
+    get_err: "The download did not complete. Details:",
+    b_show: "Show the file", b_page: "Download page"
   }
 };

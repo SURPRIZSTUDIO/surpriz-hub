@@ -209,6 +209,20 @@ function createUpdater({ fetch, userData, execPath, platform, arch, arm64Transla
     return true;
   }
 
+  /** Télécharge le zip de la nouvelle version pour ce système dans un dossier (Téléchargements), vérifié. */
+  async function fetchTo(hub, destDir, onProgress) {
+    const asset = hub && hub.assets && key ? hub.assets[key] : null;
+    if (!asset || !asset.url || !asset.sha256 || !allowed(asset.url)) throw Object.assign(new Error("noasset"), { step: "download" });
+    const name = decodeURIComponent(asset.url.split("/").pop()).replace(/[\\/:*?"<>|]/g, "_").replace(/\.zip$/i, "") + "-" + hub.version + ".zip";
+    const dest = path.join(destDir, name);
+    const part = dest + ".part";
+    try { await download(asset, part, onProgress); }
+    catch (e) { fs.rmSync(part, { force: true }); if (!e.step) e.step = "download"; throw e; }
+    fs.rmSync(dest, { force: true });
+    fs.renameSync(part, dest);
+    return dest;
+  }
+
   /** Lance le remplaçant (détaché) : il attend que le hub se ferme. */
   function launch(pid) {
     if (!ready) throw new Error("rien à installer");
@@ -238,7 +252,7 @@ function createUpdater({ fetch, userData, execPath, platform, arch, arm64Transla
 
   function cleanup() { try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) { /* rien */ } }
 
-  return { check, prepare, launch, consumeFailure, cleanup, target, key };
+  return { check, prepare, fetchTo, launch, consumeFailure, cleanup, target, key };
 }
 
 module.exports = { createUpdater, macScript, winScript, assetKey };

@@ -187,3 +187,4 @@ b { font-weight: 600; }
 .net.online::before { background: var(--ok); }
 .banner { margin: 0 48px 8px; padding: 10px 12px 10px 16px; border-radius: var(--r); background: #2b3008; border: 1px solid #4c560c; color: var(--text); display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 13px; }
 .btn.sm { height: 30px; padding: 0 12px; font-size: 12.5px; }
+.banner-actions { display: flex; gap: 8px; flex: none; }

@@ -1,4 +1,4 @@
-hub/node_modules/
+hub/node_modules
 hub/dist/
 hub/test/out/
 .DS_Store

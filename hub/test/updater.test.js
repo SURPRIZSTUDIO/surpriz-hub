@@ -117,6 +117,15 @@ async function guards() {
   await assert.rejects(() => up.prepare({ version: "9", assets: { "mac-arm64": { url: URL_OK, sha256: "00", size: zip.length } } }, () => {}),
     (e) => e.step === "check" && /corrompu/.test(e.message));
   assert.throws(() => up.launch(1), /rien à installer/);
+  // téléchargement direct dans un dossier (Téléchargements) : fichier vérifié, nommé avec la version
+  const dl = path.join(root, "Downloads"); fs.mkdirSync(dl);
+  const good = { version: "9.1.0", assets: { "mac-arm64": { url: URL_OK.replace("x.zip", "Surpriz-Hub-Mac-AppleSilicon.zip"), sha256: sha(zip), size: zip.length } } };
+  const file = await mk(exe, "darwin").fetchTo(good, dl, () => {});
+  assert.strictEqual(path.basename(file), "Surpriz-Hub-Mac-AppleSilicon-9.1.0.zip");
+  assert.strictEqual(sha(fs.readFileSync(file)), sha(zip));
+  good.assets["mac-arm64"].sha256 = "00";
+  await assert.rejects(() => mk(exe, "darwin").fetchTo({ ...good, version: "9.2.0" }, dl, () => {}), /corrompu/);
+  assert.deepStrictEqual(fs.readdirSync(dl), ["Surpriz-Hub-Mac-AppleSilicon-9.1.0.zip"], "fichier abîmé effacé");
 }
 
 (async () => {
