@@ -8,6 +8,7 @@
     {
       "id": "toolkit",
       "name": "Toolkit",
+      "icon": "addons/toolkit/icon.svg",
       "version": "0.27.0",
       "host": "aftereffects",
       "type": "cep",
