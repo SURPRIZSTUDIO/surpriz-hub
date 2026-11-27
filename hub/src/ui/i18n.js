@@ -57,6 +57,9 @@ window.HUB_TEXT = {
     win_install_err: "L’installation sur ce PC n’a pas abouti. Le hub fonctionne quand même depuis ce dossier. Détail :",
     win_busy: "Un autre SÜRPRIZ HÜB est ouvert : ferme-le, puis rouvre celui-ci.",
     b_continue: "Continuer",
+    welcome_kicker: "Bienvenue", welcome_title: "Range le hub dans Applications",
+    welcome_text: "SÜRPRIZ HÜB doit être dans le dossier Applications pour se mettre à jour tout seul. Un clic : il s’y range et se rouvre.",
+    b_later: "Plus tard",
     win_done_title: "C’est installé",
     win_done: "Retrouve SÜRPRIZ HÜB dans le menu Démarrer et sur le Bureau. Tu peux supprimer le zip et le dossier dans Téléchargements."
   },
@@ -117,6 +120,9 @@ window.HUB_TEXT = {
     win_install_err: "Installing on this PC did not complete. The hub still works from this folder. Details:",
     win_busy: "Another SÜRPRIZ HÜB is open: close it, then reopen this one.",
     b_continue: "Continue",
+    welcome_kicker: "Welcome", welcome_title: "Move the hub to Applications",
+    welcome_text: "SÜRPRIZ HÜB needs to be in the Applications folder to update itself. One click: it moves there and reopens.",
+    b_later: "Later",
     win_done_title: "Installed",
     win_done: "Find SÜRPRIZ HÜB in the Start menu and on the desktop. You can delete the zip and the folder in Downloads."
   }

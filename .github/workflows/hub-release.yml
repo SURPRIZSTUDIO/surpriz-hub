@@ -1,6 +1,6 @@
 # Publie SÜRPRIZ HÜB dès que sa version change dans hub/package.json :
-# tests, construction Mac + Windows, release GitHub, puis annonce dans catalog.json
-# (les hubs installés proposent alors « Mettre à jour »).
+# tests et construction (Mac + Windows), disque d'installation Mac (.dmg), release GitHub,
+# puis annonce dans catalog.json (les hubs installés proposent alors « Mettre à jour »).
 name: Publier SÜRPRIZ HÜB
 
 on:
@@ -17,15 +17,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
+    outputs:
+      todo: ${{ steps.v.outputs.todo }}
+      version: ${{ steps.v.outputs.version }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -71,28 +72,101 @@ jobs:
         working-directory: hub
         run: tools/release.sh "$RUNNER_TEMP/out"
 
-      - name: Release GitHub
+      - uses: actions/upload-artifact@v4
         if: steps.v.outputs.todo == 'true'
+        with:
+          name: hub-zips
+          path: ${{ runner.temp }}/out/
+          retention-days: 3
+
+  dmg:
+    needs: build
+    if: needs.build.outputs.todo == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: hub/package-lock.json
+
+      - name: Dépendances
+        working-directory: hub
+        run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: hub-zips
+          path: ${{ runner.temp }}/out
+
+      - name: Disques d'installation (.dmg)
+        working-directory: hub
         run: |
-          V="${{ steps.v.outputs.version }}"
+          set -euo pipefail
+          tiffutil -cathidpicheck build/dmg/background.png build/dmg/background@2x.png -out build/dmg/background.tiff
+          mkdir -p "$RUNNER_TEMP/dmgs"
+          for pair in "arm64:Surpriz-Hub-Mac-AppleSilicon" "x64:Surpriz-Hub-Mac-Intel"; do
+            A="${pair%%:*}"; F="${pair#*:}"
+            ditto -x -k "$RUNNER_TEMP/out/$F.zip" "$RUNNER_TEMP/app-$A"
+            APP="$(find "$RUNNER_TEMP/app-$A" -maxdepth 1 -name '*.app' | head -n 1)"
+            codesign --verify --deep --verbose=2 "$APP"
+            npx electron-builder --mac dmg "--$A" --publish never --prepackaged "$APP" -c.directories.output="$RUNNER_TEMP/dmg-$A"
+            cp "$RUNNER_TEMP/dmg-$A/"*.dmg "$RUNNER_TEMP/dmgs/$F.dmg"
+            hdiutil verify "$RUNNER_TEMP/dmgs/$F.dmg"
+            MNT="$(hdiutil attach -nobrowse -readonly "$RUNNER_TEMP/dmgs/$F.dmg" | tail -n 1 | cut -f3)"
+            ls -la "$MNT"
+            codesign --verify --deep "$MNT/$(basename "$APP")"
+            hdiutil detach "$MNT"
+          done
+          ls -la "$RUNNER_TEMP/dmgs"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hub-dmgs
+          path: ${{ runner.temp }}/dmgs/
+          retention-days: 3
+
+  publish:
+    needs: [build, dmg]
+    if: needs.build.outputs.todo == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      V: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/art
+
+      - name: Release GitHub
+        run: |
           {
             printf 'SÜRPRIZ HÜB %s pour Mac (Apple Silicon et Intel) et Windows.\n\n' "$V"
             printf 'Déjà installé ? Le hub propose la mise à jour tout seul.\n\n'
-            printf '**Première installation sur Mac** : ouvre Terminal et colle cette ligne (pas de réglage de sécurité à faire) :\n\n'
+            printf '**Première installation sur Mac** : télécharge le .dmg de ton Mac (Apple Silicon = puces M1, M2, M3… ; sinon Intel), ouvre-le et suis les étapes affichées.\n'
+            printf 'Sans réglage de sécurité : ouvre Terminal et colle cette ligne :\n\n'
             printf '```\ncurl -fsSL https://raw.githubusercontent.com/SURPRIZSTUDIO/surpriz-hub/main/install-mac.sh | bash\n```\n\n'
-            printf '**Première installation sur Windows** : télécharge Surpriz-Hub-Windows.zip ci-dessous, décompresse-le et ouvre SURPRIZ HUB.exe.\n'
+            printf '**Première installation sur Windows** : télécharge Surpriz-Hub-Windows.zip, décompresse-le et ouvre SURPRIZ HUB.exe : il s’installe tout seul.\n\n'
+            printf '_Les fichiers .zip Mac servent aux mises à jour automatiques._\n'
           } > "$RUNNER_TEMP/notes.md"
-          gh release create "hub-v$V" --target "$GITHUB_SHA" --title "SÜRPRIZ HÜB $V" --notes-file "$RUNNER_TEMP/notes.md" "$RUNNER_TEMP"/out/Surpriz-Hub-*.zip
+          gh release create "hub-v$V" --target "$GITHUB_SHA" --title "SÜRPRIZ HÜB $V" --notes-file "$RUNNER_TEMP/notes.md" \
+            "$RUNNER_TEMP"/art/hub-dmgs/*.dmg "$RUNNER_TEMP"/art/hub-zips/Surpriz-Hub-*.zip
 
       - name: Annonce dans le catalogue
-        if: steps.v.outputs.todo == 'true'
         run: |
-          V="${{ steps.v.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for i in 1 2 3; do
             git fetch -q origin main && git reset -q --hard origin/main
-            node hub/tools/catalog-hub.js "$RUNNER_TEMP/out/assets.json" catalog.json
+            node hub/tools/catalog-hub.js "$RUNNER_TEMP/art/hub-zips/assets.json" catalog.json
             git add catalog.json
             if git diff --cached --quiet; then echo "Catalogue déjà à jour"; break; fi
             git commit -q -m "Catalogue : SÜRPRIZ HÜB $V"

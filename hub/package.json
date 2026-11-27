@@ -1,7 +1,7 @@
 {
   "name": "surpriz-hub",
   "productName": "SURPRIZ HUB",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "SÜRPRIZ HÜB — installe les addons Sürpriz (Toolkit pour After Effects…) en un clic.",
   "author": "Sürpriz",
   "license": "UNLICENSED",
@@ -62,6 +62,25 @@
         }
       ],
       "signAndEditExecutable": false
+    },
+    "dmg": {
+      "title": "SÜRPRIZ HÜB",
+      "background": "build/dmg/background.tiff",
+      "iconSize": 96,
+      "contents": [
+        {
+          "x": 160,
+          "y": 190,
+          "type": "file"
+        },
+        {
+          "x": 480,
+          "y": 190,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "artifactName": "Surpriz-Hub-Mac-${arch}.${ext}"
     }
   },
   "dependencies": {

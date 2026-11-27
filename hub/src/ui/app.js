@@ -412,6 +412,13 @@
     $("sheet-actions").innerHTML = `<button class="btn primary" data-act="close">${esc(T().b_done)}</button>`;
   }
 
+  /** Mac : au lancement hors du dossier Applications, on propose de l'y ranger (sinon pas de mise à jour automatique). */
+  function showWelcomeMove() {
+    openSheet(T().welcome_kicker, T().welcome_title, []);
+    $("sheet-msg").innerHTML = `<p>${esc(T().welcome_text)}</p>`;
+    $("sheet-actions").innerHTML = `<button class="btn ghost" data-act="close">${esc(T().b_later)}</button><button class="btn primary" data-act="hubmove">${esc(T().b_move)}</button>`;
+  }
+
   async function doHubMove() {
     const res = await api.moveToApps();
     if (res && res.ok) return; // l'app se rouvre depuis Applications
@@ -474,5 +481,6 @@
     render();
     refreshStatus();
     if (state.info.justInstalled && !state.info.winInstall) showWinDone();
+    else if (state.info.platform === "darwin" && state.info.inApplications === false && !state.updateFailed) showWelcomeMove();
   })();
 })();
