@@ -13,6 +13,7 @@ window.HUB_TEXT = {
     soon_title: "D’autres addons arrivent", soon_text: "Le hub accueillera bientôt des addons pour d’autres logiciels.",
     meta_version: "Version", meta_host: "Logiciel", meta_os: "Systèmes", os_both: "Mac · Windows",
     tools_title: "Les outils", shots_title: "Aperçu du panneau",
+    cl_title: "Nouveautés", cl_new: "Nouveau", cl_more: (n) => "et " + n + " autre" + (n > 1 ? "s" : "") + " — détails dans la fiche.",
     host_found: (v) => v + " détecté sur cet ordinateur.",
     host_missing: "After Effects n’a pas été trouvé sur cet ordinateur. Tu peux installer quand même.",
     host_running: "After Effects est ouvert : relance-le après l’installation.",
@@ -49,7 +50,15 @@ window.HUB_TEXT = {
     hub_got_mac: (f) => "<b>" + f + "</b> est dans ton dossier Téléchargements. Ouvre-le, puis glisse SÜRPRIZ HÜB dans Applications en remplaçant l’ancien.",
     hub_got_win: (f) => "<b>" + f + "</b> est dans ton dossier Téléchargements. Décompresse-le, puis remplace l’ancien dossier du hub.",
     get_err: "Le téléchargement n’a pas abouti. Détail :",
-    b_show: "Afficher le fichier", b_page: "Page de téléchargement"
+    b_show: "Afficher le fichier", b_page: "Page de téléchargement",
+    sheet_wininstall: "Installation sur ce PC",
+    step_wcopy: "Copie dans tes programmes", step_wlinks: "Raccourcis menu Démarrer et Bureau", step_wregister: "Ajout dans Paramètres › Applications",
+    win_installing: "SÜRPRIZ HÜB va se rouvrir depuis ton menu Démarrer dans quelques secondes.",
+    win_install_err: "L’installation sur ce PC n’a pas abouti. Le hub fonctionne quand même depuis ce dossier. Détail :",
+    win_busy: "Un autre SÜRPRIZ HÜB est ouvert : ferme-le, puis rouvre celui-ci.",
+    b_continue: "Continuer",
+    win_done_title: "C’est installé",
+    win_done: "Retrouve SÜRPRIZ HÜB dans le menu Démarrer et sur le Bureau. Tu peux supprimer le zip et le dossier dans Téléchargements."
   },
   en: {
     nav_all: "All add-ons", nav_soon: "soon",
@@ -64,6 +73,7 @@ window.HUB_TEXT = {
     soon_title: "More add-ons are coming", soon_text: "The hub will soon host add-ons for other software.",
     meta_version: "Version", meta_host: "Software", meta_os: "Systems", os_both: "Mac · Windows",
     tools_title: "The tools", shots_title: "Panel preview",
+    cl_title: "What’s new", cl_new: "New", cl_more: (n) => "and " + n + " more — details on the add-on page.",
     host_found: (v) => v + " found on this computer.",
     host_missing: "After Effects wasn’t found on this computer. You can install anyway.",
     host_running: "After Effects is open: restart it after installing.",
@@ -100,6 +110,14 @@ window.HUB_TEXT = {
     hub_got_mac: (f) => "<b>" + f + "</b> is in your Downloads folder. Open it, then drag SÜRPRIZ HÜB into Applications, replacing the old one.",
     hub_got_win: (f) => "<b>" + f + "</b> is in your Downloads folder. Unzip it, then replace the old hub folder.",
     get_err: "The download did not complete. Details:",
-    b_show: "Show the file", b_page: "Download page"
+    b_show: "Show the file", b_page: "Download page",
+    sheet_wininstall: "Installing on this PC",
+    step_wcopy: "Copying to your programs", step_wlinks: "Start menu and desktop shortcuts", step_wregister: "Adding to Settings › Apps",
+    win_installing: "SÜRPRIZ HÜB will reopen from your Start menu in a few seconds.",
+    win_install_err: "Installing on this PC did not complete. The hub still works from this folder. Details:",
+    win_busy: "Another SÜRPRIZ HÜB is open: close it, then reopen this one.",
+    b_continue: "Continue",
+    win_done_title: "Installed",
+    win_done: "Find SÜRPRIZ HÜB in the Start menu and on the desktop. You can delete the zip and the folder in Downloads."
   }
 };

@@ -27,6 +27,41 @@
       "name": "Toolkit",
       "icon": "addons/toolkit/icon.svg",
       "version": "0.27.0",
+      "changelog": [
+        {
+          "version": "0.27.0",
+          "date": "2026-11-27",
+          "notes": {
+            "fr": [
+              "Toolkit s’installe et se met à jour depuis SÜRPRIZ HÜB, en un clic."
+            ],
+            "en": [
+              "Toolkit now installs and updates from SÜRPRIZ HÜB, in one click."
+            ]
+          }
+        },
+        {
+          "version": "0.26.0",
+          "notes": {
+            "fr": [
+              "Compatible After Effects 2027.",
+              "Accès libre : plus besoin de clé de licence.",
+              "Courbes : fonctionne aussi sur les images clés de tracés (masques, calques de forme).",
+              "Couleurs : sur Mac, le curseur du sélecteur se déplace normalement.",
+              "Ma palette : les couleurs ajoutées ne disparaissent plus.",
+              "Le panneau s’ouvre en anglais par défaut."
+            ],
+            "en": [
+              "Works with After Effects 2027.",
+              "Free access: no license key needed anymore.",
+              "Curves: also works on path keyframes (masks, shape layers).",
+              "Colors: on Mac, the picker cursor moves normally.",
+              "My palette: added colors no longer disappear.",
+              "The panel opens in English by default."
+            ]
+          }
+        }
+      ],
       "host": "aftereffects",
       "type": "cep",
       "cep": {

@@ -15,6 +15,12 @@ contextBridge.exposeInMainWorld("hub", {
   moveToApps: () => ipcRenderer.invoke("hub:moveToApps"),
   fetchHub: () => ipcRenderer.invoke("hub:fetchHub"),
   revealFetched: () => ipcRenderer.invoke("hub:revealFetched"),
+  winInstall: () => ipcRenderer.invoke("hub:winInstall"),
+  onWinInstallProgress: (cb) => {
+    const h = (e, info) => cb(info);
+    ipcRenderer.on("hub:winInstallProgress", h);
+    return () => ipcRenderer.removeListener("hub:winInstallProgress", h);
+  },
   onUpdateProgress: (cb) => {
     const h = (e, info) => cb(info);
     ipcRenderer.on("hub:updateProgress", h);

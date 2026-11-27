@@ -133,6 +133,18 @@ b { font-weight: 600; }
 
 .sec-title { display: flex; align-items: baseline; gap: 12px; font-family: "Inter Display", "Inter", sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.03em; margin: 48px 0 18px; }
 .sec-title span { font-family: var(--mono); font-size: 12px; color: var(--faint); font-weight: 400; letter-spacing: 0; }
+.changelog { border-top: 1px solid var(--line-2); }
+.cl-entry { display: grid; grid-template-columns: 200px 1fr; gap: 6px 24px; padding: 16px 0 18px; border-bottom: 1px solid var(--line); }
+.cl-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; align-self: start; }
+.cl-date { font-size: 12px; color: var(--muted); }
+.cl-new { font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-ink); background: var(--accent); border-radius: 99px; padding: 1px 8px; }
+.cl-entry ul, .cl-mini ul { list-style: none; display: grid; gap: 6px; }
+.cl-entry li, .cl-mini li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.45; }
+.cl-entry li::before, .cl-mini li::before { content: ""; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 1px; background: var(--accent); }
+.cl-mini { margin: 4px 0 2px; }
+.cl-mini li { font-size: 13px; color: var(--text); }
+.cl-label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.sheet-msg .cl-mini { margin-top: 14px; }
 .tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line-2); }
 .tool { padding: 18px 18px 20px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 34px 1fr; gap: 4px 12px; }
 .tool:nth-child(3n+2), .tool:nth-child(3n+3) { padding-left: 18px; border-left: 1px solid var(--line); }

@@ -28,6 +28,31 @@
     if (img && img.tagName === "IMG" && img.parentElement && img.parentElement.classList.contains("app-icon")) img.outerHTML = MARK;
   }, true);
 
+  /* ---------- Notes de version (« Nouveautés ») ---------- */
+  function notesSince(a, from) {
+    return (a.changelog || []).filter((e) => e && e.version && (!from || cmpVer(e.version, from) > 0));
+  }
+  function fmtDate(d) {
+    if (!d) return "";
+    try { return new Intl.DateTimeFormat(state.lang === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "short", year: "numeric" }).format(new Date(d + "T12:00:00")); }
+    catch (e) { return d; }
+  }
+  const entryNotes = (e) => (e.notes && (e.notes[state.lang] || e.notes.fr || e.notes.en)) || [];
+  function changelogHtml(entries, newer) {
+    return entries.map((e) => `
+      <div class="cl-entry">
+        <div class="cl-head"><span class="chip mono">v${esc(e.version)}</span><span class="cl-date">${esc(fmtDate(e.date))}</span>${newer && newer(e) ? `<span class="cl-new">${esc(T().cl_new)}</span>` : ""}</div>
+        <ul>${entryNotes(e).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+      </div>`).join("");
+  }
+  function miniNotes(entries, max) {
+    const items = [];
+    entries.forEach((e) => entryNotes(e).forEach((n) => items.push(n)));
+    if (!items.length) return "";
+    const more = items.length - max;
+    return `<div class="cl-mini"><p class="cl-label">${esc(T().cl_title)}</p><ul>${items.slice(0, max).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>${more > 0 ? `<p class="note">${esc(T().cl_more(more))}</p>` : ""}</div>`;
+  }
+
   const state = { lang: "fr", view: "list", filter: "all", detail: null, catalog: null, source: null, status: {}, info: {} };
   const T = () => window.HUB_TEXT[state.lang];
   const L = (o) => (o && typeof o === "object") ? (o[state.lang] || o.fr || "") : (o || "");
@@ -126,6 +151,7 @@
           </div>
           <p class="f-tag">${esc(L(a.tagline))}</p>
           ${statusPill(a)}
+          ${stateOf(a) === "update" ? miniNotes(notesSince(a, st.version), 3) : ""}
           ${legacyN && stateOf(a) !== "loading" ? `<p class="note">${esc(T().legacy_note(legacyN))}</p>` : ""}
           <div class="actions">
             ${primaryAction(a)}
@@ -172,6 +198,8 @@
           <button class="btn ghost danger" data-act="uninstall" data-id="${a.id}">${esc(T().b_uninstall)}</button>` : ""}
         </div>
       </div>
+      ${(a.changelog || []).length ? `<h2 class="sec-title">${esc(T().cl_title)}</h2>
+      <div class="changelog">${changelogHtml((a.changelog || []).slice(0, 5), (e) => st.installed && st.version && cmpVer(e.version, st.version) > 0)}</div>` : ""}
       <h2 class="sec-title">${esc(T().tools_title)}<span>${String(a.tools.length).padStart(2, "0")}</span></h2>
       <div class="tools">
         ${a.tools.map((t) => `<div class="tool">${icon(t.icon)}<strong>${esc(L(t.name))}</strong><p>${esc(L(t.text))}</p></div>`).join("")}
@@ -239,6 +267,7 @@
 
   async function doInstall(id) {
     const a = state.catalog.addons.find((x) => x.id === id);
+    const before = (state.status[id] || {}).installed ? (state.status[id] || {}).version : null;
     const keys = ["download", "allow", "clean", "copy"];
     openSheet(T().sheet_install, a.name + " v" + a.version, keys);
     setStep("allow", "doing");
@@ -258,6 +287,7 @@
     else if (res.ok) {
       msg = `<p>${T().done_install(esc(a.cep.menu || a.name))}</p>`;
       if (res.hostRunning) msg += `<p class="muted">${esc(T().done_restart)}</p>`;
+      if (before) msg += miniNotes(notesSince(a, before), 6);
     } else {
       const bad = (res.steps || []).find((s) => !s.ok && s.key !== "clean");
       msg = `<p>${esc(T().failed)}</p><p><code>${esc(bad ? bad.detail : "?")}</code></p>`;
@@ -348,6 +378,40 @@
     }
   }
 
+  /* ---------- Windows : installation comme une app au premier lancement ---------- */
+  async function doWinInstall() {
+    const keys = ["wcopy", "wlinks", "wregister"];
+    const map = { copy: "wcopy", links: "wlinks", register: "wregister" };
+    openSheet(T().sheet_wininstall, "SÜRPRIZ HÜB", keys);
+    let current = null;
+    const off = api.onWinInstallProgress((info) => {
+      const k = map[info.step];
+      if (!k) return;
+      if (current && current !== k) setStep(current, "ok");
+      current = k; setStep(k, "doing");
+    });
+    let res;
+    try { res = await api.winInstall(); } catch (e) { res = { ok: false, step: "copy", detail: String(e.message || e) }; }
+    off();
+    if (res.ok) {
+      keys.forEach((k) => setStep(k, "ok"));
+      $("sheet-msg").innerHTML = `<p>${esc(T().win_installing)}</p>`;
+      return;
+    }
+    const failed = map[res.step] || "wcopy";
+    for (const k of keys) { if (k === failed) break; setStep(k, "ok"); }
+    setStep(failed, "err");
+    $("sheet-msg").innerHTML = res.detail === "busy" ? `<p>${esc(T().win_busy)}</p>`
+      : `<p>${esc(T().win_install_err)}</p><p><code>${esc(res.detail || "?")}</code></p>`;
+    $("sheet-actions").innerHTML = `<button class="btn primary" data-act="close">${esc(T().b_continue)}</button>`;
+  }
+
+  function showWinDone() {
+    openSheet(T().sheet_wininstall, T().win_done_title, []);
+    $("sheet-msg").innerHTML = `<p>${esc(T().win_done)}</p>`;
+    $("sheet-actions").innerHTML = `<button class="btn primary" data-act="close">${esc(T().b_done)}</button>`;
+  }
+
   async function doHubMove() {
     const res = await api.moveToApps();
     if (res && res.ok) return; // l'app se rouvre depuis Applications
@@ -405,8 +469,10 @@
     document.documentElement.lang = state.lang;
     $("ver").textContent = "HÜB " + state.info.version;
     try { state.updateFailed = await api.updateFailed(); } catch (e) { state.updateFailed = false; }
+    if (state.info.winInstall) { render(); doWinInstall(); }
     await loadCatalog(true);
     render();
     refreshStatus();
+    if (state.info.justInstalled && !state.info.winInstall) showWinDone();
   })();
 })();

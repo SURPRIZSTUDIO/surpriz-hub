@@ -1,12 +1,14 @@
 SÜRPRIZ HÜB pour Windows
 ========================
 
-1. Décompresse ce zip où tu veux (par exemple dans Documents).
-   Si tu avais déjà le hub, remplace simplement l'ancien dossier.
+1. Décompresse ce zip (par exemple dans Téléchargements).
 2. Ouvre « {EXE} ».
    Si Windows affiche « Windows a protégé votre ordinateur » :
    Informations complémentaires › Exécuter quand même (une seule fois).
-3. Clique « Installer » sur Toolkit, puis relance After Effects :
+3. Le hub s’installe tout seul sur ton PC (menu Démarrer et Bureau) et se rouvre.
+   Tu peux ensuite supprimer le zip et ce dossier.
+4. Clique « Installer » sur Toolkit, puis relance After Effects :
    Fenêtre › Extensions › Toolkit.
 
 Ensuite, le hub se met à jour tout seul : un bandeau propose « Mettre à jour ».
+Pour le désinstaller : Paramètres › Applications › SÜRPRIZ HÜB.

@@ -16,16 +16,21 @@ Ce dépôt sert de serveur à **SÜRPRIZ HÜB**. Les utilisateurs ne viennent ja
 
 ## Publier une mise à jour
 
-Le plus simple : demander à Claude « publie Toolkit 0.27.0 » avec le nouveau dossier `toolkit`.
+Le plus simple : demander à Claude « publie Toolkit 0.28.0 » avec le nouveau dossier `toolkit` et la liste des changements.
 
 À la main :
 
 ```
-python3 outils/publier_addon.py toolkit 0.27.0 chemin/vers/le/dossier/toolkit
-git add . && git commit -m "Toolkit 0.27.0" && git push
+python3 outils/publier_addon.py toolkit 0.28.0 chemin/vers/le/dossier/toolkit \
+    --fr "Couleurs : nouveau bouton pour copier une palette." \
+    --en "Colors: new button to copy a palette."
+git add . && git commit -m "Toolkit 0.28.0" && git push
 ```
 
-Le script zippe le dossier, calcule son empreinte (le hub vérifie que le fichier téléchargé est intact) et met à jour la version dans `catalog.json`. Les utilisateurs voient « Mise à jour disponible » à leur prochaine ouverture du hub (quelques minutes de délai possibles, le temps que GitHub rafraîchisse).
+Le script zippe le dossier, calcule son empreinte (le hub vérifie que le fichier téléchargé est intact), met à jour la version
+dans `catalog.json` et ajoute les notes de version en tête de `changelog`. Le hub affiche ces notes (« Nouveautés ») sur la
+carte de l'addon quand une mise à jour est disponible, sur sa fiche, et à la fin de la mise à jour. Les utilisateurs voient
+« Mise à jour disponible » à leur prochaine ouverture du hub (quelques minutes de délai possibles, le temps que GitHub rafraîchisse).
 
 ## Ajouter un nouvel addon
 

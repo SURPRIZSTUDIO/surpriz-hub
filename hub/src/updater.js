@@ -1,7 +1,8 @@
 /* Mise à jour du hub lui-même : téléchargement de la nouvelle version, vérification de l'empreinte,
    remplacement de l'app une fois fermée, puis réouverture. Si le remplacement échoue, l'ancienne app
    est remise en place et rouverte, et le hub l'affiche au démarrage suivant. */
-const fs = require("fs");
+let fs;
+try { fs = require("original-fs"); } catch (e) { fs = require("fs"); } // Electron : les .asar restent des fichiers
 const path = require("path");
 const crypto = require("crypto");
 const { execFile, spawn } = require("child_process");
