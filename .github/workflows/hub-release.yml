@@ -130,8 +130,9 @@ jobs:
           retention-days: 3
 
   publish:
+    # publie même si le .dmg n'a pas pu être fabriqué (Mac de GitHub indisponibles) : les zips suffisent aux mises à jour
     needs: [build, dmg]
-    if: needs.build.outputs.todo == 'true'
+    if: always() && needs.build.result == 'success' && needs.build.outputs.todo == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -148,17 +149,24 @@ jobs:
 
       - name: Release GitHub
         run: |
+          shopt -s nullglob
+          DMGS=("$RUNNER_TEMP"/art/hub-dmgs/*.dmg)
           {
             printf 'SÜRPRIZ HÜB %s pour Mac (Apple Silicon et Intel) et Windows.\n\n' "$V"
             printf 'Déjà installé ? Le hub propose la mise à jour tout seul.\n\n'
-            printf '**Première installation sur Mac** : télécharge le .dmg de ton Mac (Apple Silicon = puces M1, M2, M3… ; sinon Intel), ouvre-le et suis les étapes affichées.\n'
-            printf 'Sans réglage de sécurité : ouvre Terminal et colle cette ligne :\n\n'
+            if [ ${#DMGS[@]} -gt 0 ]; then
+              printf '**Première installation sur Mac** : télécharge le .dmg de ton Mac (Apple Silicon = puces M1, M2, M3… ; sinon Intel), ouvre-le et suis les étapes affichées.\n'
+              printf 'Sans réglage de sécurité : ouvre Terminal et colle cette ligne :\n\n'
+            else
+              printf '**Première installation sur Mac** : ouvre Terminal et colle cette ligne (pas de réglage de sécurité à faire) :\n\n'
+            fi
             printf '```\ncurl -fsSL https://raw.githubusercontent.com/SURPRIZSTUDIO/surpriz-hub/main/install-mac.sh | bash\n```\n\n'
             printf '**Première installation sur Windows** : télécharge Surpriz-Hub-Windows.zip, décompresse-le et ouvre SURPRIZ HUB.exe : il s’installe tout seul.\n\n'
             printf '_Les fichiers .zip Mac servent aux mises à jour automatiques._\n'
           } > "$RUNNER_TEMP/notes.md"
+          [ ${#DMGS[@]} -gt 0 ] || echo "::warning::Pas de .dmg pour cette version (Mac de GitHub indisponibles)."
           gh release create "hub-v$V" --target "$GITHUB_SHA" --title "SÜRPRIZ HÜB $V" --notes-file "$RUNNER_TEMP/notes.md" \
-            "$RUNNER_TEMP"/art/hub-dmgs/*.dmg "$RUNNER_TEMP"/art/hub-zips/Surpriz-Hub-*.zip
+            "${DMGS[@]}" "$RUNNER_TEMP"/art/hub-zips/Surpriz-Hub-*.zip
 
       - name: Annonce dans le catalogue
         run: |
