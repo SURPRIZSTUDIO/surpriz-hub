@@ -1,6 +1,6 @@
-# Sürpriz Hub — catalogue en ligne
+# SÜRPRIZ HÜB — catalogue en ligne et code de l'app
 
-Ce dépôt sert de serveur au **Sürpriz Hub**. Les utilisateurs ne viennent jamais ici : à chaque ouverture, le hub lit `catalog.json`, compare avec ce qui est installé et propose les nouveautés et mises à jour.
+Ce dépôt sert de serveur à **SÜRPRIZ HÜB**. Les utilisateurs ne viennent jamais ici : à chaque ouverture, le hub lit `catalog.json`, compare avec ce qui est installé et propose les nouveautés et mises à jour.
 
 ## Contenu
 
@@ -11,6 +11,8 @@ Ce dépôt sert de serveur au **Sürpriz Hub**. Les utilisateurs ne viennent jam
 | `addons/<id>/shots/` | Les captures affichées dans le hub. |
 | `addons/<id>/guides/` | Les guides PDF ouverts depuis le hub. |
 | `outils/publier_addon.py` | Script qui prépare une nouvelle version. |
+| `hub/` | Le code de l'app SÜRPRIZ HÜB (Mac et Windows). |
+| `.github/workflows/hub-release.yml` | Construction et publication automatiques du hub. |
 
 ## Publier une mise à jour
 
@@ -31,7 +33,15 @@ Ajouter une fiche dans `catalog.json` (sur le modèle de Toolkit) puis publier s
 
 ## Nouvelle version du hub
 
-`hub.version` dans `catalog.json` : si elle est plus récente que celle de l'app, le hub affiche un bandeau avec un lien vers `hub.download` (la page Releases de ce dépôt). Déposer les zips Mac et Windows du hub dans une nouvelle Release.
+Changer `version` dans `hub/package.json` puis pousser sur `main` (ou demander à Claude « publie le hub 1.3.0 »).
+GitHub fait le reste tout seul (onglet **Actions**, une dizaine de minutes) :
+
+1. tests, puis construction des apps Mac (Apple Silicon, Intel) et Windows ;
+2. création de la release `hub-v<version>` avec les trois zips ;
+3. mise à jour de la section `hub` de `catalog.json` (version, adresses et empreintes des zips).
+
+Les hubs installés affichent alors « Mettre à jour » : ils téléchargent la bonne version, vérifient son empreinte,
+se remplacent et se rouvrent. Le hub 1.1 n'a pas encore ce bouton : il propose seulement le téléchargement.
 
 ## Addons payants (plus tard)
 

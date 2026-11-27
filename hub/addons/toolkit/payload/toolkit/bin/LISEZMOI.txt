@@ -1,0 +1,1 @@
+Déposer ici ffmpeg (Mac : ffmpeg, Windows : ffmpeg.exe) pour activer la compression sans installation.

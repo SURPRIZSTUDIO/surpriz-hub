@@ -1,0 +1,70 @@
+{
+  "name": "surpriz-hub",
+  "productName": "SURPRIZ HUB",
+  "version": "1.2.0",
+  "description": "SÜRPRIZ HÜB — installe les addons Sürpriz (Toolkit pour After Effects…) en un clic.",
+  "author": "Sürpriz",
+  "license": "UNLICENSED",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/installers.test.js"
+  },
+  "devDependencies": {
+    "electron": "45.5.0",
+    "electron-builder": "26.18.0",
+    "pe-library": "^1.0.1",
+    "resedit": "^2.0.3"
+  },
+  "build": {
+    "appId": "com.surpriz.hub",
+    "productName": "SURPRIZ HUB",
+    "copyright": "© Sürpriz",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "addons",
+        "to": "addons"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "identity": null,
+      "extendInfo": {
+        "CFBundleDisplayName": "SÜRPRIZ HÜB"
+      }
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false
+    }
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.18"
+  }
+}

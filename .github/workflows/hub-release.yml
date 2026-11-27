@@ -1,0 +1,94 @@
+# Publie SÜRPRIZ HÜB dès que sa version change dans hub/package.json :
+# tests, construction Mac + Windows, release GitHub, puis annonce dans catalog.json
+# (les hubs installés proposent alors « Mettre à jour »).
+name: Publier SÜRPRIZ HÜB
+
+on:
+  push:
+    branches: [main]
+    paths: ["hub/package.json", ".github/workflows/hub-release.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hub-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: hub/package-lock.json
+
+      - name: Version à publier
+        id: v
+        run: |
+          V=$(node -p "require('./hub/package.json').version")
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          if gh release view "hub-v$V" >/dev/null 2>&1; then
+            echo "todo=false" >> "$GITHUB_OUTPUT"; echo "hub-v$V existe déjà : rien à publier."
+          else
+            echo "todo=true" >> "$GITHUB_OUTPUT"; echo "Publication de hub-v$V"
+          fi
+
+      - name: Dépendances
+        if: steps.v.outputs.todo == 'true'
+        working-directory: hub
+        run: npm ci
+
+      - name: Tests
+        if: steps.v.outputs.todo == 'true'
+        working-directory: hub
+        run: |
+          node test/installers.test.js
+          node test/catalog.test.js
+          node test/updater.test.js "$(command -v pwsh)"
+
+      - name: Outil de signature Mac (rcodesign)
+        if: steps.v.outputs.todo == 'true'
+        run: |
+          curl -sSL -o /tmp/rc.tgz "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.29.0/apple-codesign-0.29.0-x86_64-unknown-linux-musl.tar.gz"
+          echo "dbe85cedd8ee4217b64e9a0e4c2aef92ab8bcaaa41f20bde99781ff02e600002  /tmp/rc.tgz" | sha256sum -c -
+          tar xzf /tmp/rc.tgz -C /tmp
+          echo "RCODESIGN=/tmp/apple-codesign-0.29.0-x86_64-unknown-linux-musl/rcodesign" >> "$GITHUB_ENV"
+
+      - name: Construction Mac + Windows
+        if: steps.v.outputs.todo == 'true'
+        working-directory: hub
+        run: tools/release.sh "$RUNNER_TEMP/out"
+
+      - name: Release GitHub
+        if: steps.v.outputs.todo == 'true'
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          printf 'SÜRPRIZ HÜB %s pour Mac (Apple Silicon et Intel) et Windows.\n\nDéjà installé ? Le hub propose la mise à jour tout seul.\nPremière installation : télécharge le zip de ton ordinateur ci-dessous.\n' "$V" > "$RUNNER_TEMP/notes.md"
+          gh release create "hub-v$V" --target "$GITHUB_SHA" --title "SÜRPRIZ HÜB $V" --notes-file "$RUNNER_TEMP/notes.md" "$RUNNER_TEMP"/out/Surpriz-Hub-*.zip
+
+      - name: Annonce dans le catalogue
+        if: steps.v.outputs.todo == 'true'
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for i in 1 2 3; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            node hub/tools/catalog-hub.js "$RUNNER_TEMP/out/assets.json" catalog.json
+            git add catalog.json
+            if git diff --cached --quiet; then echo "Catalogue déjà à jour"; break; fi
+            git commit -q -m "Catalogue : SÜRPRIZ HÜB $V"
+            if git push -q origin HEAD:main; then echo "Catalogue publié"; break; fi
+            sleep 5
+          done
