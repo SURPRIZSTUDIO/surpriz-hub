@@ -10,7 +10,7 @@ on:
         required: false
   push:
     branches: [main]
-    paths: [".github/workflows/hub-dmg.yml", "hub/build/dmg/**"]
+    paths: [".github/workflows/hub-dmg.yml", "hub/build/dmg/**", "hub/tools/make_dmg.py"]
 
 permissions:
   contents: write

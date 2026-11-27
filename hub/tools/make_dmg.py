@@ -27,7 +27,7 @@ settings = {
     "symlinks": {"Applications": "/Applications"},
     "icon_locations": {name: (160, 190), "Applications": (480, 190)},
     "background": str(HUB / "build" / "dmg" / "background.png"),  # background@2x.png est repris automatiquement
-    "window_rect": ((200, 120), (640, 440)),
+    "window_rect": ((200, 120), (640, 468)),  # 440 de fond + la barre de titre du Finder
     "default_view": "icon-view",
     "icon_size": 96,
     "text_size": 12,
