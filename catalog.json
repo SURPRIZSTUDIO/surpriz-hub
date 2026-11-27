@@ -26,8 +26,22 @@
       "id": "toolkit",
       "name": "Toolkit",
       "icon": "addons/toolkit/icon.svg",
-      "version": "0.27.0",
+      "version": "0.28.0",
       "changelog": [
+        {
+          "version": "0.28.0",
+          "date": "2026-11-27",
+          "notes": {
+            "fr": [
+              "Expressions : fonctionnent aussi sur les modèles 3D, les caméras et les lumières. After Effects n’accepte pas d’effets sur ces calques : les réglages sont placés sur un calque nul « Toolkit · … » juste au-dessus.",
+              "Rotation continue : sur l’Orientation d’un calque 3D, l’objet tourne sur lui-même."
+            ],
+            "en": [
+              "Expressions: now work on 3D models, cameras and lights. After Effects doesn’t accept effects on these layers, so the controls go on a “Toolkit · …” null right above.",
+              "Continuous rotation: on a 3D layer’s Orientation, the object spins on itself."
+            ]
+          }
+        },
         {
           "version": "0.27.0",
           "date": "2026-11-27",
@@ -209,9 +223,9 @@
         "en": "addons/toolkit/guides/guide-en.pdf"
       },
       "download": {
-        "url": "addons/toolkit/toolkit-0.27.0.zip",
-        "sha256": "dec39eec5f43edc52028234f4e0fe532c4426df4c401639c6c0964670b372c82",
-        "size": 139798
+        "url": "addons/toolkit/toolkit-0.28.0.zip",
+        "sha256": "99301257c29b5930f86f4b6adda634eb2d3d6afda4223e25c3c80e5d3bd47d32",
+        "size": 140767
       },
       "price": null,
       "license": null
