@@ -55,7 +55,7 @@ jobs:
             "$PY" tools/make_dmg.py "$APP" "$RUNNER_TEMP/dmgs/$F.dmg"
             hdiutil verify "$RUNNER_TEMP/dmgs/$F.dmg"
             MNT="$(hdiutil attach -readonly "$RUNNER_TEMP/dmgs/$F.dmg" | tail -n 1 | cut -f3)"
-            ls -la "$MNT" "$MNT/.background"
+            ls -la "$MNT"; test -s "$MNT/.background.tiff" && test -s "$MNT/.DS_Store"
             codesign --verify --deep "$MNT/$(basename "$APP")"
             # capture de la fenêtre du Finder, pour vérifier le rendu
             open "$MNT" || true; sleep 6
