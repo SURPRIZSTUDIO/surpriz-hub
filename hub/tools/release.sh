@@ -15,8 +15,8 @@ for d in dist/mac-arm64 dist/mac; do "$RCODESIGN" sign "$d/$NAME.app"; done
 node tools/win-resources.mjs "dist/win-unpacked/$NAME.exe" build/icon.ico "$V"
 
 rm -f "$OUT"/Surpriz-Hub-*.zip
-(cd dist/mac-arm64 && zip -qry "$OUT/Surpriz-Hub-Mac-AppleSilicon.zip" "$NAME.app")
-(cd dist/mac && zip -qry "$OUT/Surpriz-Hub-Mac-Intel.zip" "$NAME.app")
+(cd dist/mac-arm64 && zip -qry "$OUT/Surpriz-Hub-Mac-AppleSilicon-maj-auto.zip" "$NAME.app")
+(cd dist/mac && zip -qry "$OUT/Surpriz-Hub-Mac-Intel-maj-auto.zip" "$NAME.app")
 mkdir -p "dist/win-zip/$NAME"
 cp -a dist/win-unpacked/. "dist/win-zip/$NAME/"
 sed "s/{EXE}/$NAME.exe/" tools/LISEZ-MOI-windows.txt > "dist/win-zip/$NAME/LISEZ-MOI.txt"

@@ -49,7 +49,8 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/dmgs" "$RUNNER_TEMP/captures"
           for F in Surpriz-Hub-Mac-AppleSilicon Surpriz-Hub-Mac-Intel; do
-            ditto -x -k "$RUNNER_TEMP/out/$F.zip" "$RUNNER_TEMP/app-$F"
+            Z="$RUNNER_TEMP/out/$F-maj-auto.zip"; [ -f "$Z" ] || Z="$RUNNER_TEMP/out/$F.zip"
+            ditto -x -k "$Z" "$RUNNER_TEMP/app-$F"
             APP="$(find "$RUNNER_TEMP/app-$F" -maxdepth 1 -name '*.app' | head -n 1)"
             codesign --verify --deep --verbose=1 "$APP"
             "$PY" tools/make_dmg.py "$APP" "$RUNNER_TEMP/dmgs/$F.dmg"
@@ -87,6 +88,6 @@ jobs:
             printf 'Sans réglage de sécurité : ouvre Terminal et colle cette ligne :\n\n'
             printf '```\ncurl -fsSL https://raw.githubusercontent.com/SURPRIZSTUDIO/surpriz-hub/main/install-mac.sh | bash\n```\n\n'
             printf '**Première installation sur Windows** : télécharge Surpriz-Hub-Windows.zip, décompresse-le et ouvre SURPRIZ HUB.exe : il s’installe tout seul.\n\n'
-            printf '_Les fichiers .zip Mac servent aux mises à jour automatiques._\n'
+            printf '_Les fichiers « maj-auto » servent aux mises à jour automatiques du hub : inutile de les télécharger._\n'
           } > "$RUNNER_TEMP/notes.md"
           gh release edit "$TAG" --notes-file "$RUNNER_TEMP/notes.md"

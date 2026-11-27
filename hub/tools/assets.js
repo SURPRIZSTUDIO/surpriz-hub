@@ -3,7 +3,8 @@
 const fs = require("fs"), path = require("path"), crypto = require("crypto");
 const [dir, version] = process.argv.slice(2);
 const REPO = "https://github.com/SURPRIZSTUDIO/surpriz-hub";
-const FILES = { "mac-arm64": "Surpriz-Hub-Mac-AppleSilicon.zip", "mac-x64": "Surpriz-Hub-Mac-Intel.zip", "win-x64": "Surpriz-Hub-Windows.zip" };
+// les zips Mac servent aux mises à jour automatiques (« maj-auto ») ; pour installer, on prend le .dmg
+const FILES = { "mac-arm64": "Surpriz-Hub-Mac-AppleSilicon-maj-auto.zip", "mac-x64": "Surpriz-Hub-Mac-Intel-maj-auto.zip", "win-x64": "Surpriz-Hub-Windows.zip" };
 const assets = {};
 for (const [key, file] of Object.entries(FILES)) {
   const buf = fs.readFileSync(path.join(dir, file));

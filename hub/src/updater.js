@@ -214,7 +214,7 @@ function createUpdater({ fetch, userData, execPath, platform, arch, arm64Transla
   async function fetchTo(hub, destDir, onProgress) {
     const asset = hub && hub.assets && key ? hub.assets[key] : null;
     if (!asset || !asset.url || !asset.sha256 || !allowed(asset.url)) throw Object.assign(new Error("noasset"), { step: "download" });
-    const name = decodeURIComponent(asset.url.split("/").pop()).replace(/[\\/:*?"<>|]/g, "_").replace(/\.zip$/i, "") + "-" + hub.version + ".zip";
+    const name = decodeURIComponent(asset.url.split("/").pop()).replace(/[\\/:*?"<>|]/g, "_").replace(/\.zip$/i, "").replace(/-maj-auto$/i, "") + "-" + hub.version + ".zip";
     const dest = path.join(destDir, name);
     const part = dest + ".part";
     try { await download(asset, part, onProgress); }
