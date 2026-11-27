@@ -8,7 +8,7 @@
     {
       "id": "toolkit",
       "name": "Toolkit",
-      "version": "0.26.0",
+      "version": "0.27.0",
       "host": "aftereffects",
       "type": "cep",
       "cep": {
@@ -156,9 +156,9 @@
         "en": "addons/toolkit/guides/guide-en.pdf"
       },
       "download": {
-        "url": "addons/toolkit/toolkit-0.26.0.zip",
-        "sha256": "c4c8ccfdf9dc2339ca47b8b297414c57b6a87bf1d8952f62d23fb1942fd53ecf",
-        "size": 139799
+        "url": "addons/toolkit/toolkit-0.27.0.zip",
+        "sha256": "dec39eec5f43edc52028234f4e0fe532c4426df4c401639c6c0964670b372c82",
+        "size": 139798
       },
       "price": null,
       "license": null
