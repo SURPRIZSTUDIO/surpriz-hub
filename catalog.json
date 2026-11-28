@@ -1,23 +1,23 @@
 {
   "schema": 1,
   "hub": {
-    "version": "1.4.2",
+    "version": "1.5.0",
     "download": "https://github.com/SURPRIZSTUDIO/surpriz-hub/releases/latest",
     "assets": {
       "mac-arm64": {
-        "url": "https://github.com/SURPRIZSTUDIO/surpriz-hub/releases/download/hub-v1.4.2/Surpriz-Hub-Mac-AppleSilicon-maj-auto.zip",
-        "sha256": "91b993c6a8d5a430afd7e3a8198204d470e029cfd086e7b632f61ef6fd411e26",
-        "size": 127259171
+        "url": "https://github.com/SURPRIZSTUDIO/surpriz-hub/releases/download/hub-v1.5.0/Surpriz-Hub-Mac-AppleSilicon-maj-auto.zip",
+        "sha256": "2a903b0b7bd6fc82f528700f8c3798d182d5d0950d9400d80e69839c8a87916c",
+        "size": 127259430
       },
       "mac-x64": {
-        "url": "https://github.com/SURPRIZSTUDIO/surpriz-hub/releases/download/hub-v1.4.2/Surpriz-Hub-Mac-Intel-maj-auto.zip",
-        "sha256": "250fbcb4baac8c1fa66f47df101bb417d46b4acad81292092b065deceb53ecd3",
-        "size": 133364089
+        "url": "https://github.com/SURPRIZSTUDIO/surpriz-hub/releases/download/hub-v1.5.0/Surpriz-Hub-Mac-Intel-maj-auto.zip",
+        "sha256": "eeab80d2d1ae0703ca1bddd406e7cc9eb5c17c0268d466e6910b83985b1125e9",
+        "size": 133364356
       },
       "win-x64": {
-        "url": "https://github.com/SURPRIZSTUDIO/surpriz-hub/releases/download/hub-v1.4.2/Surpriz-Hub-Windows.zip",
-        "sha256": "a60d0b69844b13dd81503f9884aca43222b3eddfc01f9747d6313f9c644ad1e2",
-        "size": 165197912
+        "url": "https://github.com/SURPRIZSTUDIO/surpriz-hub/releases/download/hub-v1.5.0/Surpriz-Hub-Windows.zip",
+        "sha256": "f1cd4717ff1906924e8535880341d6fd67c9cbdfdbc69b7f5665ad2c4b5b7cdf",
+        "size": 165198184
       }
     }
   },
