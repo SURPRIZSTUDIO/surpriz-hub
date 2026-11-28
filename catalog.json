@@ -234,8 +234,20 @@
       "id": "batch",
       "name": "BATCH",
       "icon": "addons/batch/icon.svg",
-      "version": "2.5.0",
+      "version": "2.5.1",
       "changelog": [
+        {
+          "version": "2.5.1",
+          "date": "2026-11-28",
+          "notes": {
+            "fr": [
+              "Le bouton Générer devient un interrupteur rectangulaire, avec la LED et le libellé à l’intérieur."
+            ],
+            "en": [
+              "The Generate button is now a rectangular switch, with the LED and label inside."
+            ]
+          }
+        },
         {
           "version": "2.5.0",
           "date": "2026-11-28",
@@ -347,9 +359,9 @@
         ]
       },
       "download": {
-        "url": "addons/batch/batch-2.5.0.zip",
-        "sha256": "689d97cc3384cf14321fa4f882d4a911fabda0402e4b66acf8a4c5efaf051357",
-        "size": 147629
+        "url": "addons/batch/batch-2.5.1.zip",
+        "sha256": "5fa821a25bcc05f86a9ce76e241a85fe6860cedee8ac7c94bb028c58d49c727e",
+        "size": 147677
       },
       "price": null,
       "license": null
