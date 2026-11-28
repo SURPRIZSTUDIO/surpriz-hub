@@ -1,4 +1,4 @@
-/* Installation des extensions CEP (After Effects, Premiere, Photoshop…).
+/* Installation des extensions CEP (After Effects, Illustrator, Photoshop, Premiere…).
    - autorise les extensions non signées pour toutes les versions de CEP (réglage par utilisateur, sans mot de passe) ;
    - retire toutes les anciennes copies (même identifiant, quel que soit le nom du dossier) ;
    - copie la nouvelle version et lève la quarantaine de macOS. */
@@ -87,19 +87,29 @@ function removeSystemCopy(dir) {
   return false;
 }
 
-/** Logiciel hôte : versions d'After Effects installées et s'il est ouvert. */
+/** Logiciels Adobe reconnus : nom du dossier d'installation, processus sur Mac (motif) et Windows (exécutable). */
+const HOSTS = {
+  aftereffects: { folder: /^Adobe After Effects/i, mac: "After Effects[^/]*\\.app/Contents/MacOS", win: "AfterFX.exe" },
+  illustrator: { folder: /^Adobe Illustrator/i, mac: "Adobe Illustrator[^/]*\\.app/Contents/MacOS", win: "Illustrator.exe" },
+  photoshop: { folder: /^Adobe Photoshop/i, mac: "Adobe Photoshop[^/]*\\.app/Contents/MacOS", win: "Photoshop.exe" },
+  premiere: { folder: /^Adobe Premiere Pro/i, mac: "Adobe Premiere Pro[^/]*\\.app/Contents/MacOS", win: "Adobe Premiere Pro.exe" },
+  indesign: { folder: /^Adobe InDesign/i, mac: "Adobe InDesign[^/]*\\.app/Contents/MacOS", win: "InDesign.exe" }
+};
+
+/** Logiciel hôte d'un addon : versions installées et s'il est ouvert. */
 function hostInfo(host) {
   const out = { installed: [], running: false };
-  if (host !== "aftereffects") return out;
+  const H = HOSTS[host];
+  if (!H) return out;
   try {
     if (IS_MAC) {
-      out.installed = fs.readdirSync("/Applications").filter((n) => /^Adobe After Effects/i.test(n)).map((n) => n.replace(/^Adobe /, ""));
-      try { cp.execFileSync("pgrep", ["-f", "After Effects.app/Contents/MacOS"], { stdio: "ignore" }); out.running = true; } catch (e) { out.running = false; }
+      out.installed = fs.readdirSync("/Applications").filter((n) => H.folder.test(n)).map((n) => n.replace(/^Adobe /, ""));
+      try { cp.execFileSync("pgrep", ["-f", H.mac], { stdio: "ignore" }); out.running = true; } catch (e) { out.running = false; }
     } else if (IS_WIN) {
       const base = path.join(process.env.ProgramFiles || "C:\\Program Files", "Adobe");
-      out.installed = fs.readdirSync(base).filter((n) => /^Adobe After Effects/i.test(n)).map((n) => n.replace(/^Adobe /, ""));
-      const list = cp.execFileSync("tasklist", ["/FI", "IMAGENAME eq AfterFX.exe", "/NH"], { encoding: "utf8", windowsHide: true });
-      out.running = /AfterFX\.exe/i.test(list);
+      out.installed = fs.readdirSync(base).filter((n) => H.folder.test(n)).map((n) => n.replace(/^Adobe /, ""));
+      const list = cp.execFileSync("tasklist", ["/FI", "IMAGENAME eq " + H.win, "/NH"], { encoding: "utf8", windowsHide: true });
+      out.running = list.toLowerCase().includes(H.win.toLowerCase());
     }
   } catch (e) { /* rien trouvé */ }
   out.installed.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
@@ -170,4 +180,4 @@ function uninstall(addon) {
   return { ok: blocked.length === 0, removed, blocked, hostRunning: hostInfo(addon.host).running };
 }
 
-module.exports = { status, install, uninstall, userExtDir, _test: { findCopies, readManifest, hostInfo } };
+module.exports = { status, install, uninstall, userExtDir, HOSTS, _test: { findCopies, readManifest, hostInfo } };

@@ -20,6 +20,10 @@
     doc: '<path d="M6 3h8l4 4v14H6z M14 3v4h4 M9 12h6 M9 16h6"/>'
   };
   const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ""}</svg>`;
+  // icône d'un outil : tracé fourni par le catalogue (« svg », grille 24 × 24) ou icône du hub
+  const toolIcon = (t) => t.svg ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${esc(t.svg)}"/></svg>` : icon(t.icon);
+  const hostName = (a) => T().hosts[a.host] || a.host;
+  const needsHub = (a) => !!(a.minHub && state.info && cmpVer(a.minHub, state.info.version) > 0);
   // Tuile d'un addon : son icône (catalogue en ligne ou copie fournie avec l'app), sinon le Ü du hub.
   const MARK = document.getElementById("mark-tpl").innerHTML;
   const appIcon = (a, lg) => `<div class="app-icon${lg ? " lg" : ""}">${a && a.iconUrl ? `<img src="${esc(a.iconUrl)}" alt="">` : MARK}</div>`;
@@ -87,6 +91,7 @@
   }
 
   function primaryAction(addon) {
+    if (needsHub(addon)) return `<button class="btn primary" disabled>${esc(T().b_needs_hub)}</button>`;
     const s = stateOf(addon);
     if (s === "loading") return `<button class="btn primary" disabled>${esc(T().b_install)}</button>`;
     if (s === "installed") return `<button class="btn secondary" data-act="install" data-id="${addon.id}">${esc(T().b_reinstall)}</button>`;
@@ -95,12 +100,13 @@
   }
 
   function hostNote(addon) {
+    if (needsHub(addon)) return `<div class="host-note warn"><span class="dot"></span>${esc(T().needs_hub(addon.minHub))}</div>`;
     const st = state.status[addon.id];
     if (!st || !st.host) return "";
     const h = st.host;
-    if (h.running) return `<div class="host-note warn"><span class="dot"></span>${esc(T().host_running)}</div>`;
+    if (h.running) return `<div class="host-note warn"><span class="dot"></span>${esc(T().host_running(hostName(addon)))}</div>`;
     if (h.installed && h.installed.length) return `<div class="host-note"><span class="dot"></span>${esc(T().host_found(h.installed[0]))}</div>`;
-    return `<div class="host-note warn"><span class="dot"></span>${esc(T().host_missing)}</div>`;
+    return `<div class="host-note warn"><span class="dot"></span>${esc(T().host_missing(hostName(addon)))}</div>`;
   }
 
   /* ---------- Barre latérale ---------- */
@@ -133,7 +139,7 @@
           <h1 class="h-title">${T().title}</h1>
           <p class="lead">${esc(T().lead)}</p>
         </div>
-        ${first ? hostNote(first) : ""}
+        ${list.length === 1 ? hostNote(first) : ""}
       </div>
       <hr class="rule">`;
     list.forEach((a) => {
@@ -200,12 +206,12 @@
       </div>
       ${(a.changelog || []).length ? `<h2 class="sec-title">${esc(T().cl_title)}</h2>
       <div class="changelog">${changelogHtml((a.changelog || []).slice(0, 5), (e) => st.installed && st.version && cmpVer(e.version, st.version) > 0)}</div>` : ""}
-      <h2 class="sec-title">${esc(T().tools_title)}<span>${String(a.tools.length).padStart(2, "0")}</span></h2>
+      <h2 class="sec-title">${esc(T().tools_title)}<span>${String((a.tools || []).length).padStart(2, "0")}</span></h2>
       <div class="tools">
-        ${a.tools.map((t) => `<div class="tool">${icon(t.icon)}<strong>${esc(L(t.name))}</strong><p>${esc(L(t.text))}</p></div>`).join("")}
+        ${(a.tools || []).map((t) => `<div class="tool">${toolIcon(t)}<strong>${esc(L(t.name))}</strong><p>${esc(L(t.text))}</p></div>`).join("")}
       </div>
-      <h2 class="sec-title">${esc(T().shots_title)}</h2>
-      <div class="shots">${(a.shotUrls[state.lang] || []).map((u) => `<img src="${esc(u)}" alt="">`).join("")}</div>`;
+      ${(a.shotUrls[state.lang] || []).length ? `<h2 class="sec-title">${esc(T().shots_title)}</h2>
+      <div class="shots">${a.shotUrls[state.lang].map((u) => `<img src="${esc(u)}" alt="">`).join("")}</div>` : ""}`;
     $("view").innerHTML = html;
   }
 
@@ -251,10 +257,11 @@
   }
 
   /* ---------- Installation ---------- */
-  function openSheet(kicker, title, keys) {
+  function openSheet(kicker, title, keys, ctx) {
     $("sheet-kicker").textContent = kicker;
     $("sheet-title").textContent = title;
-    $("sheet-steps").innerHTML = keys.map((k) => `<li data-key="${k}"><span class="ico"></span><span>${esc(T()["step_" + k])}</span></li>`).join("");
+    const label = (k) => { const v = T()["step_" + k]; return typeof v === "function" ? v(ctx || {}) : v; };
+    $("sheet-steps").innerHTML = keys.map((k) => `<li data-key="${k}"><span class="ico"></span><span>${esc(label(k))}</span></li>`).join("");
     $("sheet-msg").innerHTML = "";
     $("sheet-actions").innerHTML = "";
     $("sheet").hidden = false;
@@ -269,7 +276,8 @@
     const a = state.catalog.addons.find((x) => x.id === id);
     const before = (state.status[id] || {}).installed ? (state.status[id] || {}).version : null;
     const keys = ["download", "allow", "clean", "copy"];
-    openSheet(T().sheet_install, a.name + " v" + a.version, keys);
+    if (needsHub(a)) return;
+    openSheet(T().sheet_install, a.name + " v" + a.version, keys, { host: hostName(a), name: a.name });
     setStep("allow", "doing");
     let res;
     try { res = await api.install(id); } catch (e) { res = { ok: false, steps: [{ key: "copy", ok: false, detail: String(e.message || e) }] }; }
@@ -285,8 +293,8 @@
     let msg = "";
     if (byKey.payload) msg = `<p>${esc(T().step_payload)}</p>`;
     else if (res.ok) {
-      msg = `<p>${T().done_install(esc(a.cep.menu || a.name))}</p>`;
-      if (res.hostRunning) msg += `<p class="muted">${esc(T().done_restart)}</p>`;
+      msg = `<p>${T().done_install(esc(a.cep.menu || a.name), esc(hostName(a)))}</p>`;
+      if (res.hostRunning) msg += `<p class="muted">${esc(T().done_restart(hostName(a)))}</p>`;
       if (before) msg += miniNotes(notesSince(a, before), 6);
     } else {
       const bad = (res.steps || []).find((s) => !s.ok && s.key !== "clean");
@@ -309,12 +317,12 @@
     }
     armedAt = 0;
     const a = state.catalog.addons.find((x) => x.id === id);
-    openSheet(T().sheet_uninstall, a.name, ["remove"]);
+    openSheet(T().sheet_uninstall, a.name, ["remove"], { host: hostName(a), name: a.name });
     setStep("remove", "doing");
     const res = await api.uninstall(id);
     await sleep(320);
     setStep("remove", res.ok ? "ok" : "warn");
-    $("sheet-msg").innerHTML = `<p>${esc(T().done_uninstall)}</p>` + (res.ok ? "" : `<p class="muted">${esc(T().blocked)}</p>`);
+    $("sheet-msg").innerHTML = `<p>${esc(T().done_uninstall(a.name))}</p>` + (res.ok ? "" : `<p class="muted">${esc(T().blocked)}</p>`);
     $("sheet-actions").innerHTML = `<button class="btn primary" data-act="close">${esc(T().b_done)}</button>`;
     await refreshStatus(id);
   }

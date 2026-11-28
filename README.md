@@ -34,7 +34,16 @@ carte de l'addon quand une mise à jour est disponible, sur sa fiche, et à la f
 
 ## Ajouter un nouvel addon
 
-Ajouter une fiche dans `catalog.json` (sur le modèle de Toolkit) puis publier sa première version avec le script. Le champ `type` indique comment l'installer : `cep` pour After Effects, Premiere, Photoshop, Illustrator. Pour un autre logiciel (Blender…), le hub a besoin d'un module d'installation en plus.
+Ajouter une fiche dans `catalog.json` (sur le modèle de Toolkit ou de BATCH) puis publier sa première version avec le script.
+
+- `type` : comment l'installer. `cep` pour les extensions Adobe (After Effects, Illustrator, Photoshop, Premiere, InDesign).
+  Pour un autre logiciel (Blender…), le hub a besoin d'un module d'installation en plus.
+- `host` : le logiciel (`aftereffects`, `illustrator`, `photoshop`, `premiere`, `indesign`). Il sert au classement, aux textes
+  (« Ouvre Illustrator, puis Fenêtre › Extensions… ») et à la détection du logiciel sur l'ordinateur.
+- `cep.bundleId`, `cep.folder`, `cep.menu` : repris du `CSXS/manifest.xml` de l'extension.
+- `tools` : les outils présentés sur la fiche ; l'icône est soit un nom connu du hub (`icon`), soit un tracé SVG 24 × 24 (`svg`).
+- `images` : captures du panneau ; `icon` : la tuile de l'addon (SVG 617 × 617, coins arrondis de 140).
+- `minHub` : version minimale du hub ; les hubs plus anciens affichent « Mise à jour du hub requise ».
 
 ## Installer le hub sur un Mac
 
