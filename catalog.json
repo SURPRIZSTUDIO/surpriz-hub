@@ -229,6 +229,130 @@
       },
       "price": null,
       "license": null
+    },
+    {
+      "id": "batch",
+      "name": "BATCH",
+      "icon": "addons/batch/icon.svg",
+      "version": "2.5.0",
+      "changelog": [
+        {
+          "version": "2.5.0",
+          "date": "2026-11-28",
+          "notes": {
+            "fr": [
+              "Disponible dans SÜRPRIZ HÜB : installation et mises à jour en un clic."
+            ],
+            "en": [
+              "Now in SÜRPRIZ HÜB: one-click install and updates."
+            ]
+          }
+        }
+      ],
+      "host": "illustrator",
+      "type": "cep",
+      "minHub": "1.5.0",
+      "cep": {
+        "bundleId": "com.surpriz.logopack",
+        "legacyIds": [],
+        "folder": "com.surpriz.logopack",
+        "menu": "BATCH"
+      },
+      "requires": {
+        "fr": "Illustrator 2022 ou plus récent",
+        "en": "Illustrator 2022 or later"
+      },
+      "tagline": {
+        "fr": "Glisse ton logo, choisis les versions : BATCH génère toutes les planches, déjà nommées.",
+        "en": "Drop your logo, pick the versions: BATCH builds every artboard, already named."
+      },
+      "tools": [
+        {
+          "svg": "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5",
+          "name": {
+            "fr": "Profils",
+            "en": "Profiles"
+          },
+          "text": {
+            "fr": "Un profil par client : couleur de marque, versions cochées, noms et réglages.",
+            "en": "One profile per client: brand color, chosen versions, names and settings."
+          }
+        },
+        {
+          "svg": "M12 4v10 M8 10l4 4 4-4 M4 19h16",
+          "name": {
+            "fr": "Source",
+            "en": "Source"
+          },
+          "text": {
+            "fr": "Glisse un SVG, AI, EPS ou PDF, ou ton logo depuis le document : il reste mémorisé.",
+            "en": "Drop an SVG, AI, EPS or PDF, or your logo from the document: it stays loaded."
+          }
+        },
+        {
+          "svg": "M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z",
+          "name": {
+            "fr": "Couleur",
+            "en": "Color"
+          },
+          "text": {
+            "fr": "Couleurs du logo (Pantone compris), tes couleurs, sélecteur et pipette d’Illustrator.",
+            "en": "Logo colors (Pantone included), your own colors, Illustrator’s picker and eyedropper."
+          }
+        },
+        {
+          "svg": "M4 4h7v7H4z M13 4h7v7h-7z M4 13h7v7H4z M13 13h7v7h-7z",
+          "name": {
+            "fr": "Versions",
+            "en": "Versions"
+          },
+          "text": {
+            "fr": "Couleur, noir, blanc, gris, uni : sans fond ou sur fond coloré, fonds verrouillés au choix.",
+            "en": "Color, black, white, gray, solid: no background or on a colored one, backgrounds locked or not."
+          }
+        },
+        {
+          "svg": "M3 12V4h8l10 10-8 8z M7.5 7.5h.01",
+          "name": {
+            "fr": "Noms",
+            "en": "Names"
+          },
+          "text": {
+            "fr": "Chaque planche est nommée selon ton modèle : client, logo, couleur, fond.",
+            "en": "Every artboard is named from your template: client, logo, color, background."
+          }
+        },
+        {
+          "svg": "M13 3L5 14h6l-1 7 8-11h-6z",
+          "name": {
+            "fr": "Générer",
+            "en": "Generate"
+          },
+          "text": {
+            "fr": "Une planche par version en un clic, avec un aperçu fond sombre pour vérifier les logos blancs.",
+            "en": "One artboard per version in one click, with a dark preview to check white logos."
+          }
+        }
+      ],
+      "images": {
+        "fr": [
+          "addons/batch/shots/1-profil-source.png",
+          "addons/batch/shots/2-versions.png",
+          "addons/batch/shots/3-noms-generer.png"
+        ],
+        "en": [
+          "addons/batch/shots/1-profil-source.png",
+          "addons/batch/shots/2-versions.png",
+          "addons/batch/shots/3-noms-generer.png"
+        ]
+      },
+      "download": {
+        "url": "addons/batch/batch-2.5.0.zip",
+        "sha256": "689d97cc3384cf14321fa4f882d4a911fabda0402e4b66acf8a4c5efaf051357",
+        "size": 147629
+      },
+      "price": null,
+      "license": null
     }
   ],
   "soon": [
