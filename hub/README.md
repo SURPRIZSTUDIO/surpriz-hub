@@ -16,6 +16,7 @@ Premier addon : **Toolkit** pour After Effects.
 - `npm test` : tests du moteur d'installation.
 - `node test/updater.test.js` : tests de la mise à jour du hub lui-même (Windows : PowerShell requis).
 - `node test/winInstall.test.js` : tests de l'installation Windows « comme une app ».
+- `xvfb-run -a npx electron test/electron-asar.test.js --no-sandbox` : même chose dans Electron (app.asar doit rester un fichier).
 - `RCODESIGN=… tools/release.sh <dossier>` : construire, signer et zipper les versions Mac et Windows (c'est ce que fait GitHub à chaque nouvelle version).
 
 ## Mise à jour du hub

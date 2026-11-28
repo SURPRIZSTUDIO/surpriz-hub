@@ -5,7 +5,7 @@ const fs = require("fs");
 const { pathToFileURL } = require("url");
 const { createCatalog } = require("./catalog");
 const { createUpdater } = require("./updater");
-const { createWinInstall, APP_ID } = require("./winInstall");
+const { createWinInstall, APP_ID, cmpVer } = require("./winInstall");
 
 const drivers = { cep: require("./installers/cep") };
 
@@ -23,10 +23,26 @@ const gotLock = !IS_WIN || app.requestSingleInstanceLock();
 if (!gotLock) app.quit();
 app.on("second-instance", (e, argv) => {
   if (winInst && argv.includes("--uninstall")) return uninstallFlow(argv); // désinstallation pendant que le hub est ouvert
+  if (IS_WIN && app.isPackaged && newerCopyTakesOver(argv[0])) return;
   const w = BrowserWindow.getAllWindows()[0];
   if (w) { if (w.isMinimized()) w.restore(); w.focus(); }
 });
 let winInst = null, winInstallNeeded = false;
+
+/** Windows : on vient d'ouvrir une version plus récente (ex. depuis Téléchargements) alors que ce hub est ouvert.
+    Ce hub se ferme et lance la nouvelle, qui s'installe à sa place. */
+function newerCopyTakesOver(exe) {
+  try {
+    if (!exe || path.dirname(path.resolve(exe)).toLowerCase() === path.dirname(process.execPath).toLowerCase()) return false;
+    const pkg = path.join(path.dirname(exe), "resources", "app.asar", "package.json");
+    const v = JSON.parse(fs.readFileSync(pkg, "utf8")).version;
+    if (!v || cmpVer(v, app.getVersion()) <= 0) return false;
+    app.releaseSingleInstanceLock();
+    require("child_process").spawn(exe, [], { detached: true, stdio: "ignore", cwd: path.dirname(exe) }).unref();
+    app.quit();
+    return true;
+  } catch (err) { return false; }
+}
 const justInstalled = process.argv.includes("--installed");
 
 const BUNDLED_DIR = app.isPackaged

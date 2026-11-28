@@ -9,6 +9,14 @@ const { execFile, spawn } = require("child_process");
 
 const STALL_MS = 60000;
 
+/* Dans le hub, Electron traite les fichiers .asar comme des dossiers : écrire ou modifier l'app.asar de la
+   nouvelle version échoue (« ENOENT … chmod app.asar »). On coupe ce comportement le temps des opérations. */
+async function withoutAsar(fn) {
+  const prev = process.noAsar;
+  process.noAsar = true;
+  try { return await fn(); } finally { process.noAsar = prev; }
+}
+
 function assetKey(platform, arch) {
   if (platform === "darwin") return arch === "arm64" ? "mac-arm64" : "mac-x64";
   if (platform === "win32") return "win-x64";
@@ -192,7 +200,7 @@ function createUpdater({ fetch, userData, execPath, platform, arch, arm64Transla
     if (!c.ok) throw Object.assign(new Error(c.reason), { step: "download", reason: c.reason });
     const asset = hub.assets[key];
     const t = target();
-    fs.rmSync(dir, { recursive: true, force: true });
+    await withoutAsar(() => fs.rmSync(dir, { recursive: true, force: true }));
     const zip = path.join(dir, "hub-" + hub.version + ".zip");
     onStep("download", { received: 0, total: asset.size || 0 });
     try { await download(asset, zip, (r, tot) => onStep("download", { received: r, total: tot })); }
@@ -201,10 +209,9 @@ function createUpdater({ fetch, userData, execPath, platform, arch, arm64Transla
     onStep("prepare", {});
     const dest = path.join(dir, "app");
     try {
-      await (extract || defaultExtract)(zip, dest);
-      fs.rmSync(zip, { force: true });
+      await withoutAsar(async () => { await (extract || defaultExtract)(zip, dest); fs.rmSync(zip, { force: true }); });
     } catch (e) { throw Object.assign(new Error("décompression impossible : " + (e.message || e)), { step: "prepare" }); }
-    const found = findNew(dest);
+    const found = await withoutAsar(() => findNew(dest));
     if (!found) throw Object.assign(new Error("archive incomplète"), { step: "prepare" });
     ready = { oldLocation: t.location, app: found.app, exe: found.exe };
     return true;
@@ -251,9 +258,13 @@ function createUpdater({ fetch, userData, execPath, platform, arch, arm64Transla
     return true;
   }
 
-  function cleanup() { try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) { /* rien */ } }
+  function cleanup() {
+    const prev = process.noAsar;
+    process.noAsar = true;
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch (e) { /* rien */ } finally { process.noAsar = prev; }
+  }
 
   return { check, prepare, fetchTo, launch, consumeFailure, cleanup, target, key };
 }
 
-module.exports = { createUpdater, macScript, winScript, assetKey };
+module.exports = { createUpdater, macScript, winScript, assetKey, withoutAsar };

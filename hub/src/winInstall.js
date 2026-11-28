@@ -92,6 +92,12 @@ function createWinInstall({ execPath, env, version, desktop, userData, shell, sp
 
   /** Copie l'app dans Programmes, crée les raccourcis, l'inscrit dans Paramètres › Applications. */
   async function install(onStep) {
+    const prev = process.noAsar;
+    process.noAsar = true; // les .asar restent des fichiers pendant la copie
+    try { return await installFiles(onStep); } finally { process.noAsar = prev; }
+  }
+
+  async function installFiles(onStep) {
     onStep("copy");
     const tmp = installDir + ".nouveau", old = installDir + ".ancien";
     fs.rmSync(tmp, { recursive: true, force: true });
@@ -145,4 +151,4 @@ function createWinInstall({ execPath, env, version, desktop, userData, shell, sp
   return { installDir, startMenuLnk, desktopLnk, decide, install, refreshRegistration, launchInstalled, uninstall, installedVersion, registerScript };
 }
 
-module.exports = { createWinInstall, runPowerShell, APP_ID };
+module.exports = { createWinInstall, runPowerShell, APP_ID, cmpVer };
